@@ -52,6 +52,9 @@ void CMemMgr::Push(CPackage* pPackage)
 CPackage* CMemMgr::Pull()
 {
     //another lock
+    if(m_cQueuePackage.empty())
+        return NULL;
+
     CPackage* pPackage = m_cQueuePackage.front();
     m_cQueuePackage.pop();
 

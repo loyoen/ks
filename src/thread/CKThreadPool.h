@@ -40,14 +40,13 @@ public:
     }
     ~CThreadMgr();
 
-    void Init(CConfig* pConfig, CThreadHandler* pHandler);
+    void Init(CConfig* pConfig);
     bool ActivateThreadPool();
     void StopThreadPool();
 
 private:
     size_t  m_iThreadNum;
     std::vector<CThread*>   m_Threads; 
-    CThreadHandler*         m_pTaskHandler;
 };
 
 }

@@ -14,6 +14,9 @@
  *  
  **/
 
+#include "CKThreadPool.h"
+#include "../tasks/TaskHandler.h"
+
 namespace ks
 {
 
@@ -32,19 +35,19 @@ CThreadMgr::~CThreadMgr()
     m_Threads.clear();
 }
 
-void CThreadMgr::Init(CConfig* pConfig, CThreadHandler* pHandler)
+void CThreadMgr::Init(CConfig* pConfig)
 {
     if (NULL == pConfig)
         return;
     m_iThreadNum = pConfig->GetThreadNum();
-    m_pTaskHandler = pHandler;
 }
 
 bool CThreadMgr::ActivateThreadPool()
 {
     for(int index=0; index<m_iThreadNum; index++)
     {
-        CThread* pThread = new CThread(m_pThreadHandler);
+        CThreadHandler* pHandler = new CTaskHandler();
+        CThread* pThread = new CThread(pHandler);
         m_Threads.push_back(pThread);
     }
 }

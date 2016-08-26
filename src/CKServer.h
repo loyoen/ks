@@ -21,8 +21,9 @@
 #define  __CKSERVER_H_
 
 #include "CKConfig.h"
-#include "CKMemMgr.h"
-#include "CKThreadPool.h"
+#include "./memory/CKMemMgr.h"
+#include "./thread/CKThreadPool.h"
+#include "./tasks/CKTaskMgr.h"
 
 namespace ks
 {
