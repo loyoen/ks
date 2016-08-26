@@ -58,6 +58,7 @@ void CKServer::Init()
     m_pThreadMgr = CThreadMgr::GetThreadMgr();
     m_pTaskMgr = CTaskMgr::GetTaskMgr();
 
+    m_pConfig->Init();
     m_pMemMgr->Init();
     m_pThreadMgr->Init(m_pConfig);
     m_pTaskMgr->Init();

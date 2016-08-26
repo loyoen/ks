@@ -29,6 +29,7 @@ CConfig::~CConfig()
 
 void CConfig::Init()
 {
+    ReadConfig("../../config/ks.cfg");
 }
 
 bool CConfig::IsSpace(char c)
