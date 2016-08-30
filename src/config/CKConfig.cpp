@@ -126,32 +126,37 @@ bool CConfig::ReadConfig(const std::string & filename)
 
 size_t CConfig::GetThreadNum()
 {
-    std::map<std::string, std::string>::iterator iter = m_Dict.find("ThreadNum");
-    if(iter != m_Dict.end())
-        return atoi(iter->second.c_str());
-    return 10;
+    return GetIntValue("ThreadNum", 10);
 }
+
 size_t CConfig::GetPackageNum()
 {
-    std::map<std::string, std::string>::iterator iter = m_Dict.find("PackageNum");
-    if(iter != m_Dict.end())
-        return atoi(iter->second.c_str());
-    return 1024;
+    return GetIntValue("PackageNum", 1024);
 }
 
 size_t CConfig::GetPackageSize()
 {
-    std::map<std::string, std::string>::iterator iter = m_Dict.find("PackageSize");
-    if(iter != m_Dict.end())
-        return atoi(iter->second.c_str());
-    return 1024;
+    return GetIntValue("PackageSize", 1024);
 }
 
 
 size_t CConfig::GetMaxSocketNum()
 {
-    std::map<std::string, std::string>::iterator iter = m_Dict.find("SocketNum");
+    return GetIntValue("MaxSocketNum", 1024);
+}
+
+std::string CConfig::GetValue(const std::string key)
+{
+    std::map<std::string, std::string>::iterator iter = m_Dict.find(key);
     if(iter != m_Dict.end())
-        return atoi(iter->second.c_str());
-    return 1024;
+        return iter->second.c_str();
+    return "";
+}
+
+int CConfig::GetIntValue(const std::string key, int defaultValue)
+{
+    std::string value = GetValue(key);
+    if("" == value)
+        return defaultValue;
+    return atoi(value.c_str());
 }

@@ -43,6 +43,9 @@ public:
     size_t GetPackageSize();
     size_t GetMaxSocketNum();
 
+    int GetIntValue(const std::string key, int defaultValue = 0);
+    std::string GetValue(const std::string key);
+
 private:
     bool IsSpace(char c);
     bool IsCommentChar(char c);
