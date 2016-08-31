@@ -26,6 +26,8 @@
 namespace ks
 {
 
+typedef int (*PtrFuncTwo)(void*, void*);
+
 class CTaskMgr
 {
 private:
@@ -44,8 +46,11 @@ public:
     void AddTask(CTask* pTask);
     CTask* GetTask();
 
+    void SetUserCallBackFunc(PtrFuncTwo func);
+    PtrFuncTwo GetUserCallBackFunc();
 private:
     std::queue<CTask*>  m_Tasks;
+    PtrFuncTwo  m_UserCallBackFunc;
 };
 
 }

@@ -33,9 +33,12 @@ public:
     void Release();
     void SetFree(bool bIsFree);
     size_t GetLength();
+    size_t GetInitLength();
+    void SetLength(size_t length);
     char* GetData();
 
 private:
+    size_t  m_InitLength;
     size_t  m_iLength;
     bool    m_bIsFree;
     char*   m_pData;

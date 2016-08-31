@@ -36,7 +36,7 @@ public:
 class CEchoTask : public CTask
 {
 public:
-    CEchoTask(int fd);
+    CEchoTask(int fd, int events);
     ~CEchoTask();
 
     virtual void Run();
@@ -46,6 +46,7 @@ public:
 
 private:
     std::vector<CPackage*>  m_Packages;
+    CPackage*               m_OutPackage; 
     int m_iFd;
 };
 

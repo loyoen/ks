@@ -19,9 +19,12 @@
 namespace ks
 {
 
-CEchoTask::CEchoTask(int fd)
+CEchoTask::CEchoTask(int epfd, int fd, int events)
 {
+    m_iEpollFd = epfd;
     m_iFd = fd;
+    m_iEvents = events;
+    m_OutPackage = NULL;
 }
 CEchoTask::~CEchoTask()
 {
@@ -30,6 +33,7 @@ CEchoTask::~CEchoTask()
         m_Packages->Release();
     }
     m_Packages.clear();
+    m_OutPackage->Release();
 }
 
 CEchoTask::AddPackage(CPackage* pPackage)
@@ -40,11 +44,21 @@ CEchoTask::AddPackage(CPackage* pPackage)
 
 void CEchoTask::Run()
 {
-    
+    m_OutPackage = CMemMgr::GetMemMgr()->Pull();
+    (*CTaskMgr::GetTaskMgr()->GetUserCallBackFunc())(m_Packages[0], m_OutPackage);
 }
 
 void CEchoTask::CallBack()
 {
+    struct epoll_event ev;
+    ev.data.fd = m_iFd;
+    ev.events = m_iEvents | EPOLLOUT;
+    ev.data.ptr = m_OutPackage;
+
+    if (epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, m_iFd, &ev) == -1) 
+    {  
+        perror("epoll_ctl: mod");  
+    }
 }
 
 

@@ -18,6 +18,13 @@
 
 namespace ks
 {
+/*
+void SetUserCallBack(void* param, int (*func)(void*, void*))
+{
+    CKServer* pServer = (CKServer*)param;
+    pServer->SetUserCallBack(func);
+}
+*/
 
 CKServer::CKServer()
  : m_pConfig(NULL)
@@ -69,8 +76,18 @@ void CKServer::Init()
 void CKServer::Run()
 {
     // epoll
+    CThreadHandler* pHandler = new CEpollHandler(m_pConfig);
+    CThread* pThread = new CThread(pHandler);
+    pThread->Wait();
+}
 
-    // add tasks
+void CKServer::SetUserCallBackFunc(PtrFuncTwo func)
+{
+    if(m_pTaskMgr == NULL)
+    {
+        m_pTaskMgr = CTaskMgr::GetTaskMgr();
+    }
+    m_pTaskMgr->SetUserCallBackFunc(func);
 }
 
 }

@@ -21,7 +21,8 @@ namespace ks
 
 CPackage::CPackage(size_t length)
 {
-    m_iLength = length;
+    m_iInitLength = length;
+    m_iLength = 0;
     m_bIsFree = true;
     m_pData = NULL;
 }
@@ -37,7 +38,7 @@ CPackage::~CPackage()
 
 void CPackage::Init()
 {
-    m_pData = (char*)malloc(sizeof(char)*length);
+    m_pData = (char*)malloc(sizeof(char)*m_iInitlength);
 }
 
 void CPackage::SetFree(bool bIsFree)
@@ -45,9 +46,19 @@ void CPackage::SetFree(bool bIsFree)
     m_bIsFree = bIsFree;
 }
 
+void CPackage::SetLength(int length)
+{
+    m_iLength = length;
+}
+
 size_t CPackage::GetLength()
 {
     return m_iLength;
+}
+
+size_t CPackage::GetInitLength()
+{
+    return m_iInitLenght;
 }
 
 char* CPackage::GetData()
@@ -58,6 +69,7 @@ char* CPackage::GetData()
 void CPackage::Release()
 {
     m_bIsFree = true;
+    m_iLength = 0;
     CMemMgr* pMemMgr = CMemMgr::GetMemMgr();
     pMemMgr->Push(this);
 }

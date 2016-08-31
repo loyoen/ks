@@ -50,6 +50,16 @@ CTask* CTaskMgr::GetTask()
     return pTask;
 }
 
+void CTaskMgr::SetUserCallBackFunc(PtrFuncTwo func)
+{
+    m_UserCallBackFunc = func;
+}
+
+PtrFuncTwo CTaskMgr::GetUserCallBackFunc()
+{
+    return m_UserCallBackFunc;
+}
+
 }
 
 

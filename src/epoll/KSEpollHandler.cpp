@@ -98,22 +98,100 @@ void CEpollHandler::DoAccept()
     }
 }
 
-void CEpollHandler::DoRead()
+void CEpollHandler::DoRead(struct epoll_event ev)
 {
-    int n = 0, nread = 0;
+    int nindex = 0, nread = 0, nleft = 0;
+    
+    CMemMgr* pMemMgr = CMemMgr::GetMemMgr(); 
+    CPackage* pPackage = NULL;
+    char* readbuf = NULL;
+    CTask* pTask = NULL;
 
-    while ((nread = read(fd, buf + n, BUFSIZ)) > 0) {  
-        n += nread;  
-                }  
-                if (nread == -1 && errno != EAGAIN) {  
-                    perror("read error");  
-                }  
-                ev.data.fd = fd;  
-                ev.events = events[i].events | EPOLLOUT;  
-                if (epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev) == -1) {  
-                    perror("epoll_ctl: mod");  
-                }
-     
+    do
+    {
+        nindex = 0;
+        nread = 0;
+        pPackage = pMemMgr->Pull();
+        if(NULL == pPackage)
+            return;
+        if(NULL == pTask)
+        {
+            pTask = new CEchoTask(fd, ev.events);
+        }
+
+        readbuf = pPackage->GetData;
+        nleft = pPackage->GetInitLength();
+
+        while ((nread = read(ev.data.fd, readbuf + nindex, nleft)) > 0) 
+        {  
+            nindex += nread;
+            nleft -= nread;
+            if(0 == nleft)
+                break;
+        }
+        if (nread == -1 && errno != EAGAIN) 
+        {
+            perror("read error");
+            delete pTask;
+
+            return;
+        }
+
+        pPackage->SetLength(nindex);
+
+        pTask->AddPackage(pPackage);        
+
+        if(errno == EAGAIN)
+        {
+            break;
+        }
+
+    }while(true)
+    
+    CTaskMgr* pTaskMgr = CTaskMgr::GetTaskMgr();
+    pTaskMgr->AddTask(pTask);
+}
+
+void CEpollHandler::DoWrite(int fd, char* data)
+{                
+    /*
+    sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);  
+    int nwrite, data_size = strlen(buf);  
+    n = data_size;  
+    while (n > 0) 
+    {  
+        nwrite = write(fd, buf + data_size - n, n);  
+        if (nwrite < n) 
+        {  
+            if (nwrite == -1 && errno != EAGAIN) 
+            {  
+                perror("write error");  
+            }  
+            break;  
+        }  
+        n -= nwrite;  
+    }  
+    close(fd);
+    */
+    CPackage* pPackage = (CPackage*)data;
+    char* buf = pPackage->GetData();
+    sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);  
+    int nwrite, data_size = strlen(buf);  
+    int n = data_size;  
+    while (n > 0) 
+    {  
+        nwrite = write(fd, buf + data_size - n, n);  
+        if (nwrite < n) 
+        {  
+            if (nwrite == -1 && errno != EAGAIN) 
+            {  
+                perror("write error");  
+            }  
+            break;  
+        }  
+        n -= nwrite;  
+    }  
+    close(fd);
 }
 
 void CEpollHandler::StartEpoll()
@@ -142,39 +220,16 @@ void CEpollHandler::StartEpoll()
             }    
             if (events[fdIndex].events & EPOLLIN) 
             {  
-                n = 0;  
-                while ((nread = read(fd, buf + n, BUFSIZ-1)) > 0) {  
-                    n += nread;  
-                }  
-                if (nread == -1 && errno != EAGAIN) {  
-                    perror("read error");  
-                }  
-                ev.data.fd = fd;  
-                ev.events = events[i].events | EPOLLOUT;  
-                if (epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev) == -1) {  
-                    perror("epoll_ctl: mod");  
-                }
+                DoRead(events[fdIndex]);
             }
-            if (events[i].events & EPOLLOUT) {
-                printf("into write\n");  
-                sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);  
-                int nwrite, data_size = strlen(buf);  
-                n = data_size;  
-                while (n > 0) {  
-                    nwrite = write(fd, buf + data_size - n, n);  
-                    if (nwrite < n) {  
-                        if (nwrite == -1 && errno != EAGAIN) {  
-                            perror("write error");  
-                        }  
-                        break;  
-                    }  
-                    n -= nwrite;  
-                }  
-                close(fd);  
-            }  
+            else if (events[i].events & EPOLLOUT) 
+            {
+                DoWrite(fd, events[i].data.ptr);
+            } 
         }  
-    }  
-  
+    }
+
+    free(events);
     return 0;  
 }
 
@@ -218,20 +273,3 @@ void CEpollHandler::InitListenEnv()
 }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
