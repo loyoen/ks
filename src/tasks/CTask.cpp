@@ -14,7 +14,11 @@
  *  
  **/
 
-#include "Task.h"
+#include "CTask.h"
+#include "../memory/CKMemMgr.h"
+#include "CKTaskMgr.h"
+#include <sys/epoll.h>  
+#include <fcntl.h>  
 
 namespace ks
 {
@@ -30,13 +34,13 @@ CEchoTask::~CEchoTask()
 {
     for(int i=0; i<m_Packages.size();i++)
     {
-        m_Packages->Release();
+        m_Packages[i]->Release();
     }
     m_Packages.clear();
     m_OutPackage->Release();
 }
 
-CEchoTask::AddPackage(CPackage* pPackage)
+void CEchoTask::AddPackage(CPackage* pPackage)
 {
     if(NULL != pPackage)
         m_Packages.push_back(pPackage);

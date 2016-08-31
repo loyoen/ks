@@ -23,7 +23,6 @@ namespace ks
 CThreadMgr::CThreadMgr()
 {
     m_iThreadNum = 0;
-    m_pThreadHandler = NULL;
 }
 
 CThreadMgr::~CThreadMgr()
@@ -56,7 +55,7 @@ void CThreadMgr::StopThreadPool()
 {
     for(int i=0; i<m_Threads.size(); i++)
     {
-        m_Threads[i].Stop();
+        m_Threads[i]->Stop();
     }
 }
 

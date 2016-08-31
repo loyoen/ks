@@ -31,7 +31,7 @@ public:
     virtual int OnThreadProc() = 0;
     void Stop(){m_bStoped=true;}
     bool IsStop(){return m_bStoped;}
-private:
+protected:
     bool    m_bStoped;
 };
 
@@ -50,8 +50,8 @@ public:
     int OnThreadProc();
 
 protected:
-    ThreadHandler*  m_pHandler;
-    pthread_t       m_iThredId;
+    CThreadHandler*  m_pHandler;
+    pthread_t       m_iThreadId;
 };
 
 }

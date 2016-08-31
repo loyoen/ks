@@ -30,14 +30,15 @@ CTaskMgr::~CTaskMgr()
         m_Tasks.pop();
         delete pTask;
     }
-    m_Tasks.clear();
 }
 
 void CTaskMgr::AddTask(CTask* pTask)
 {
     //lock
     if(pTask != NULL)
-        m_Tasks.push(pTask)
+    {
+        m_Tasks.push(pTask);
+    }
 }
 
 CTask* CTaskMgr::GetTask()
@@ -45,7 +46,7 @@ CTask* CTaskMgr::GetTask()
     //lock
     if(m_Tasks.empty())
         return NULL;
-    Task* pTask = m_Tasks.front();
+    CTask* pTask = m_Tasks.front();
     m_Tasks.pop();
     return pTask;
 }

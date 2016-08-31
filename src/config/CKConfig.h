@@ -22,7 +22,7 @@
 
 #include <map>
 #include <string>
-#include <iostream>
+#include <fstream>
 
 namespace ks
 {
@@ -35,6 +35,15 @@ class CConfig
 public:
     CConfig();
     ~CConfig();
+    
+    static CConfig* GetConfig()
+    {
+        if(m_pConfigInstance == NULL)
+        {
+            m_pConfigInstance = new CConfig();
+        }
+        return m_pConfigInstance;
+    }
 
     void Init();
 
@@ -49,13 +58,13 @@ public:
 private:
     bool IsSpace(char c);
     bool IsCommentChar(char c);
-    bool Trim(std::string& str);
+    void Trim(std::string& str);
     bool AnalyseLine(const std::string& line, std::string& key, std::string& value);
     bool ReadConfig(const std::string& filename); 
 
-
-
     std::map<std::string, std::string> m_Dict;
+
+    static CConfig* m_pConfigInstance;
 };
 
 }

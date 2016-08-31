@@ -23,6 +23,8 @@
 namespace ks
 {
 
+typedef unsigned int size_t;
+
 class CPackage
 {
 public:
@@ -38,7 +40,7 @@ public:
     char* GetData();
 
 private:
-    size_t  m_InitLength;
+    size_t  m_iInitLength;
     size_t  m_iLength;
     bool    m_bIsFree;
     char*   m_pData;

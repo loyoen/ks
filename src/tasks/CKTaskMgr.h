@@ -32,7 +32,7 @@ class CTaskMgr
 {
 private:
     CTaskMgr();
-    static CTaskMgr* m_pTaskMgrInstance = NULL;
+    static CTaskMgr* m_pTaskMgrInstance;
 
 public:
     static CTaskMgr* GetTaskMgr()
@@ -43,6 +43,7 @@ public:
     }
     ~CTaskMgr();
 
+    void Init(){}
     void AddTask(CTask* pTask);
     CTask* GetTask();
 

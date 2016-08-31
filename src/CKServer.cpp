@@ -66,7 +66,7 @@ void CKServer::Init()
     m_pTaskMgr = CTaskMgr::GetTaskMgr();
 
     m_pConfig->Init();
-    m_pMemMgr->Init();
+    m_pMemMgr->Init(m_pConfig);
     m_pThreadMgr->Init(m_pConfig);
     m_pTaskMgr->Init();
 

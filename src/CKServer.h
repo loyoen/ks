@@ -20,10 +20,11 @@
 #ifndef  __CKSERVER_H_
 #define  __CKSERVER_H_
 
-#include "CKConfig.h"
+#include "./config/CKConfig.h"
 #include "./memory/CKMemMgr.h"
 #include "./thread/CKThreadPool.h"
 #include "./tasks/CKTaskMgr.h"
+#include "./epoll/KSEpollHandler.h"
 
 namespace ks
 {
@@ -42,7 +43,7 @@ private:
     CConfig*        m_pConfig;
     CMemMgr*        m_pMemMgr;
     CThreadMgr*     m_pThreadMgr;
-    CKTaskMgr*      m_pTaskMgr;
+    CTaskMgr*      m_pTaskMgr;
 }; 
 
 }

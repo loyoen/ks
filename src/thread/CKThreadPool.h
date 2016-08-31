@@ -20,7 +20,8 @@
 #ifndef  __CKTHREADPOOL_H_
 #define  __CKTHREADPOOL_H_
 
-#include "CKConfig.h"
+#include "../config/CKConfig.h"
+#include "Thread.h"
 #include <vector>
 namespace ks
 {
@@ -29,7 +30,7 @@ class CThreadMgr
 {
 private:
     CThreadMgr();
-    static CThreadMgr* m_pThreadMgrInstance = NULL;
+    static CThreadMgr* m_pThreadMgrInstance;
 
 public:
     static CThreadMgr* GetThreadMgr()

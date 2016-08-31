@@ -21,7 +21,6 @@ namespace ks
 
 CThread::CThread(CThreadHandler* pHandler)
 : m_pHandler(pHandler)
-, m_bStoped(false)
 {
 }    
 
@@ -29,7 +28,7 @@ CThread::~CThread()
 {
 }
 
-void ThreadProc(void* lpParameter)
+void* ThreadProc(void* lpParameter)
 {
     CThread* pThread = (CThread*)lpParameter;
     pThread->OnThreadProc();
@@ -41,13 +40,13 @@ int CThread::Start()
     do
     {
         ret = pthread_create(&m_iThreadId, NULL, ThreadProc, this);
-    }while(false)
+    }while(false);
     return ret;
 }
 
 void CThread::Wait()
 {
-    pthread_join(m_pThreadId, NULL);
+    pthread_join(m_iThreadId, NULL);
 }
 
 void CThread::Stop()

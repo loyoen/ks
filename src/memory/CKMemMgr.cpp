@@ -32,7 +32,7 @@ CMemMgr::~CMemMgr()
     }
 }
 
-void CMemMgr::MemInit(CConfig* pConfig)
+void CMemMgr::Init(CConfig* pConfig)
 {
     size_t iPackageNum = pConfig->GetPackageNum();
     size_t iPackageSize = pConfig->GetPackageSize();

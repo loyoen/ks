@@ -22,7 +22,21 @@
 
 #include "../thread/Thread.h"
 #include "../config/CKConfig.h"
-
+#include <sys/socket.h>  
+#include <sys/wait.h>  
+#include <netinet/in.h>  
+#include <netinet/tcp.h>  
+#include <sys/epoll.h>  
+#include <sys/sendfile.h>  
+#include <sys/stat.h>  
+#include <unistd.h>  
+#include <stdio.h>  
+#include <stdlib.h>  
+#include <string.h>  
+#include <strings.h>  
+#include <fcntl.h>  
+#include <errno.h>   
+ 
 namespace ks
 {
 
@@ -37,7 +51,7 @@ public:
 private:
     void SetNonBlocking(int sockfd);
     void InitEnv();
-    void StartEpoll();
+    int StartEpoll();
 
     int DoWait();
     void DoAccept();
@@ -53,10 +67,10 @@ private:
     int     m_iNfds;
     int     m_iCurConnSock;
 
-    struct sockaddr_in  m_local;
-    struct sockaddr_in  m_remote;
+    sockaddr_in  m_local;
+    sockaddr_in  m_remote;
     int     m_addrlen;
-    struct epoll_event  m_ev;
+    epoll_event  m_ev;
 };
 
 

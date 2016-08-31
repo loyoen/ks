@@ -110,7 +110,6 @@ bool CConfig::ReadConfig(const std::string & filename)
     m_Dict.clear();
     std::ifstream infile(filename.c_str());
     if (!infile) {
-        cout << "file open error" << endl;
         return false;
     }
     std::string line, key, value;
@@ -159,4 +158,5 @@ int CConfig::GetIntValue(const std::string key, int defaultValue)
     if("" == value)
         return defaultValue;
     return atoi(value.c_str());
+}
 }

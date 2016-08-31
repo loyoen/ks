@@ -38,7 +38,7 @@ CPackage::~CPackage()
 
 void CPackage::Init()
 {
-    m_pData = (char*)malloc(sizeof(char)*m_iInitlength);
+    m_pData = (char*)malloc(sizeof(char)*m_iInitLength);
 }
 
 void CPackage::SetFree(bool bIsFree)
@@ -46,7 +46,7 @@ void CPackage::SetFree(bool bIsFree)
     m_bIsFree = bIsFree;
 }
 
-void CPackage::SetLength(int length)
+void CPackage::SetLength(size_t length)
 {
     m_iLength = length;
 }
@@ -58,7 +58,7 @@ size_t CPackage::GetLength()
 
 size_t CPackage::GetInitLength()
 {
-    return m_iInitLenght;
+    return m_iInitLength;
 }
 
 char* CPackage::GetData()

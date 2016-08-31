@@ -20,7 +20,7 @@
 #ifndef  __CKMEMMGR_H_
 #define  __CKMEMMGR_H_
 
-#include "CKConfig.h"
+#include "../config/CKConfig.h"
 #include "CKPackage.h"
 #include <queue>
 
@@ -30,7 +30,7 @@ namespace ks
 class CMemMgr
 {
 private:
-    static CMemMgr* m_pMemMgrInstance = NULL;
+    static CMemMgr* m_pMemMgrInstance;
     CMemMgr();
 
 public:
@@ -42,7 +42,7 @@ public:
     }
     ~CMemMgr();
     
-    void MemInit(CConfig* pConfig);
+    void Init(CConfig* pConfig);
     void Push(CPackage* pPackage);
     CPackage* Pull();
 
