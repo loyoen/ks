@@ -19,6 +19,8 @@
 namespace ks
 {
 
+CTaskMgr* CTaskMgr::m_pTaskMgrInstance = NULL;
+
 CTaskMgr::CTaskMgr()
 {
 }

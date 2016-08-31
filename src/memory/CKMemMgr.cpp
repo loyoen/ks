@@ -19,6 +19,8 @@
 namespace ks
 {
 
+CMemMgr* CMemMgr::m_pMemMgrInstance = NULL;
+
 CMemMgr::CMemMgr()
 {
 }

@@ -15,7 +15,9 @@
  **/
 
 #include "KSEpollHandler.h"
- 
+#include "../memory/CKMemMgr.h"
+#include "../tasks/CKTaskMgr.h"
+
 namespace ks
 {
 
@@ -66,7 +68,7 @@ int CEpollHandler::DoWait(epoll_event* events)
 
 void CEpollHandler::DoAccept()
 {
-    while ((m_iCurConnSock = accept(m_iListenFd,(struct sockaddr *) &m_remote,&m_addrlen)) > 0) 
+    while ((m_iCurConnSock = accept(m_iListenFd,(struct sockaddr *) &m_remote, (size_t*)&m_addrlen)) > 0) 
     {  
         SetNonBlocking(m_iCurConnSock);  
         m_ev.events = EPOLLIN | EPOLLET;  
@@ -84,7 +86,7 @@ void CEpollHandler::DoAccept()
     }
 }
 
-void CEpollHandler::DoRead(struct epoll_event ev)
+void CEpollHandler::DoRead(epoll_event ev)
 {
     int nindex = 0, nread = 0, nleft = 0;
     
@@ -102,10 +104,10 @@ void CEpollHandler::DoRead(struct epoll_event ev)
             return;
         if(NULL == pTask)
         {
-            pTask = new CEchoTask(fd, ev.events);
+            pTask = new CEchoTask(m_iEpollFd, ev.data.fd, ev.events);
         }
 
-        readbuf = pPackage->GetData;
+        readbuf = (char*)pPackage->GetData();
         nleft = pPackage->GetInitLength();
 
         while ((nread = read(ev.data.fd, readbuf + nindex, nleft)) > 0) 
@@ -125,14 +127,14 @@ void CEpollHandler::DoRead(struct epoll_event ev)
 
         pPackage->SetLength(nindex);
 
-        pTask->AddPackage(pPackage);        
+        pTask->AddPackage(pPackage);
 
         if(errno == EAGAIN)
         {
             break;
         }
 
-    }while(true)
+    }while(true);
     
     CTaskMgr* pTaskMgr = CTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
@@ -208,9 +210,9 @@ int CEpollHandler::StartEpoll()
             {  
                 DoRead(events[fdIndex]);
             }
-            else if (events[i].events & EPOLLOUT) 
+            else if (events[fdIndex].events & EPOLLOUT) 
             {
-                DoWrite(fd, events[i].data.ptr);
+                DoWrite(fd, (char*)events[fdIndex].data.ptr);
             } 
         }  
     }
@@ -219,7 +221,7 @@ int CEpollHandler::StartEpoll()
     return 0;  
 }
 
-void CEpollHandler::InitListenEnv()
+void CEpollHandler::InitEnv()
 {
     struct sockaddr_in local;  
   
@@ -238,7 +240,7 @@ void CEpollHandler::InitListenEnv()
         perror("bind\n");  
         exit(1);  
     }  
-    listen(m_ListenFd, 20);
+    listen(m_iListenFd, 20);
 
     
     m_iEpollFd = epoll_create(m_iMaxEvents);  

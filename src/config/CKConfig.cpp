@@ -20,6 +20,8 @@
 namespace ks
 {
 
+CConfig* CConfig::m_pConfigInstance = NULL;
+
 CConfig::CConfig()
 {
 }

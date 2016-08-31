@@ -53,10 +53,10 @@ private:
     void InitEnv();
     int StartEpoll();
 
-    int DoWait();
+    int DoWait(epoll_event* events);
     void DoAccept();
-    void DoRead();
-    void DoWrite();
+    void DoRead(epoll_event ev);
+    void DoWrite(int fd, char* data);
 
 private:
     size_t  m_iMaxEvents;

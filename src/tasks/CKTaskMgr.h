@@ -41,6 +41,7 @@ public:
             m_pTaskMgrInstance = new CTaskMgr();
         return m_pTaskMgrInstance;
     }
+
     ~CTaskMgr();
 
     void Init(){}

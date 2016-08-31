@@ -31,6 +31,7 @@ class CTask
 public:
     virtual void Run() = 0;
     virtual void CallBack() = 0;
+    virtual void AddPackage(CPackage* pPackage) = 0;
 };
 
 class CEchoTask : public CTask
@@ -42,7 +43,7 @@ public:
     virtual void Run();
     virtual void CallBack();
 
-    void AddPackage(CPackage* pPackage);
+    virtual void AddPackage(CPackage* pPackage);
 
 private:
     std::vector<CPackage*>  m_Packages;

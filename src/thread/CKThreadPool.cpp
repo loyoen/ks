@@ -20,6 +20,8 @@
 namespace ks
 {
 
+CThreadMgr* CThreadMgr::m_pThreadMgrInstance = NULL;
+
 CThreadMgr::CThreadMgr()
 {
     m_iThreadNum = 0;

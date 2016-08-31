@@ -20,7 +20,6 @@
 #ifndef  __TASKHANDLER_H_
 #define  __TASKHANDLER_H_
 
-#include "CKTaskMgr.h"
 #include "../thread/Thread.h"
 
 namespace ks
