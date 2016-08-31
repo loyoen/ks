@@ -22,6 +22,7 @@ namespace ks
 CThread::CThread(CThreadHandler* pHandler)
 : m_pHandler(pHandler)
 {
+    Start();
 }    
 
 CThread::~CThread()

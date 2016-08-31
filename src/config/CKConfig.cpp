@@ -16,7 +16,7 @@
 
 #include "CKConfig.h"
 #include <stdlib.h>
-
+#include <iostream>
 namespace ks
 {
 
@@ -31,7 +31,11 @@ CConfig::~CConfig()
 
 void CConfig::Init()
 {
-    ReadConfig("../../config/ks.cfg");
+    bool bRet = ReadConfig("../config/ks.cfg");
+    if(!bRet)
+    {
+        std::cout << "read conf error" << std::endl;
+    }
 }
 
 bool CConfig::IsSpace(char c)

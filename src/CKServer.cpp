@@ -15,6 +15,7 @@
  **/
 
 #include "CKServer.h"
+#include <iostream>
 
 namespace ks
 {

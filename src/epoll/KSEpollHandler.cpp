@@ -17,6 +17,7 @@
 #include "KSEpollHandler.h"
 #include "../memory/CKMemMgr.h"
 #include "../tasks/CKTaskMgr.h"
+#include <iostream>
 
 namespace ks
 {
@@ -26,7 +27,7 @@ CEpollHandler::CEpollHandler(CConfig* pConfig)
     m_bStoped = false;
     if(pConfig != NULL)
     {
-        m_iMaxEvents = pConfig->GetIntValue("MAXEVENTS");
+        m_iMaxEvents = pConfig->GetIntValue("MaxEvents");
         m_iPort = pConfig->GetIntValue("port");
     }
 }
@@ -94,7 +95,7 @@ void CEpollHandler::DoRead(epoll_event ev)
     CPackage* pPackage = NULL;
     char* readbuf = NULL;
     CTask* pTask = NULL;
-
+    
     do
     {
         nindex = 0;
@@ -117,6 +118,7 @@ void CEpollHandler::DoRead(epoll_event ev)
             if(0 == nleft)
                 break;
         }
+
         if (nread == -1 && errno != EAGAIN) 
         {
             perror("read error");
@@ -140,7 +142,7 @@ void CEpollHandler::DoRead(epoll_event ev)
     pTaskMgr->AddTask(pTask);
 }
 
-void CEpollHandler::DoWrite(int fd, char* data)
+void CEpollHandler::DoWrite(char* data)
 {                
     /*
     sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);  
@@ -161,11 +163,12 @@ void CEpollHandler::DoWrite(int fd, char* data)
     }  
     close(fd);
     */
-    CPackage* pPackage = (CPackage*)data;
-    char* buf = pPackage->GetData();
-    sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);  
-    int nwrite, data_size = strlen(buf);  
-    int n = data_size;  
+    CEchoTask* pTask = (CEchoTask*)data;
+    char* buf = pTask->GetOutPackage()->GetData();
+    int nwrite = 0, data_size = pTask->GetOutPackage()->GetLength();  
+    int n = data_size;
+    int fd = pTask->GetFd();
+
     while (n > 0) 
     {  
         nwrite = write(fd, buf + data_size - n, n);  
@@ -180,6 +183,7 @@ void CEpollHandler::DoWrite(int fd, char* data)
         n -= nwrite;  
     }  
     close(fd);
+    delete pTask;
 }
 
 int CEpollHandler::StartEpoll()
@@ -212,7 +216,7 @@ int CEpollHandler::StartEpoll()
             }
             else if (events[fdIndex].events & EPOLLOUT) 
             {
-                DoWrite(fd, (char*)events[fdIndex].data.ptr);
+                DoWrite((char*)events[fdIndex].data.ptr);
             } 
         }  
     }

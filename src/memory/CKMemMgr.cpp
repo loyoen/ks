@@ -41,6 +41,7 @@ void CMemMgr::Init(CConfig* pConfig)
     for(size_t i=0; i<iPackageNum; i++)
     {
         CPackage* pPackage = new CPackage(iPackageSize);
+        pPackage->Init();
         Push(pPackage);
     }
 }

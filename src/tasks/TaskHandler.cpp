@@ -16,6 +16,7 @@
 
 #include "TaskHandler.h"
 #include "CKTaskMgr.h"
+#include <iostream>
 
 namespace ks
 {

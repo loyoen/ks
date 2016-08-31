@@ -45,6 +45,9 @@ public:
 
     virtual void AddPackage(CPackage* pPackage);
 
+    int GetFd(){return m_iFd;}
+    CPackage* GetOutPackage(){return m_OutPackage;}
+
 private:
     std::vector<CPackage*>  m_Packages;
     CPackage*               m_OutPackage; 

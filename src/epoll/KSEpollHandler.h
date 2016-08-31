@@ -17,8 +17,8 @@
 
 
 
-#ifndef  ____/EPOLL/KSEPOLLHANDLER_H_
-#define  ____/EPOLL/KSEPOLLHANDLER_H_
+#ifndef  KSEPOLLHANDLER_H_
+#define  KSEPOLLHANDLER_H_
 
 #include "../thread/Thread.h"
 #include "../config/CKConfig.h"
@@ -56,7 +56,7 @@ private:
     int DoWait(epoll_event* events);
     void DoAccept();
     void DoRead(epoll_event ev);
-    void DoWrite(int fd, char* data);
+    void DoWrite(char* data);
 
 private:
     size_t  m_iMaxEvents;
