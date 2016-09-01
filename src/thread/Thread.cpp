@@ -1,14 +1,6 @@
-/***************************************************************************
- * 
- * Copyright (c) 2016 Baidu.com, Inc. All Rights Reserved
- * 
- **************************************************************************/
- 
- 
- 
 /**
  * @file Thread.cpp
- * @author luoyongen(com@baidu.com)
+ * @author loyoen(com@gmail.com)
  * @date 2016/08/25 16:48:51
  * @brief 
  *  
