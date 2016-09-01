@@ -79,7 +79,7 @@ void CEpollHandler::DoAccept()
     }
 }
 
-void CEpollHandler::DoRead(epoll_event ev)
+void CEpollHandler::DoRead(epoll_event& ev)
 {
     int nindex = 0, nread = 0, nleft = 0;
     
@@ -95,14 +95,9 @@ void CEpollHandler::DoRead(epoll_event ev)
         pPackage = pMemMgr->Pull();
         if(NULL == pPackage)
             return;
-        if(NULL == pTask)
-        {
-            pTask = new CEchoTask(m_iEpollFd, ev.data.fd, ev.events);
-        }
-
+        
         readbuf = (char*)pPackage->GetData();
         nleft = pPackage->GetInitLength();
-
         while ((nread = read(ev.data.fd, readbuf + nindex, nleft)) > 0) 
         {  
             nindex += nread;
@@ -111,16 +106,31 @@ void CEpollHandler::DoRead(epoll_event ev)
                 break;
         }
 
+        if(nread == 0)
+        {
+            epoll_ctl(m_iEpollFd, EPOLL_CTL_DEL, ev.data.fd, &ev);
+            close(ev.data.fd);
+            if(pTask != NULL)
+                delete pTask;
+            pPackage->Release();
+            return;
+        }
+
         if (nread == -1 && errno != EAGAIN) 
         {
             perror("read error");
-            delete pTask;
-
+            if(pTask != NULL)
+                delete pTask;
+            pPackage->Release();
             return;
         }
 
         pPackage->SetLength(nindex);
-
+        
+        if(NULL == pTask)
+        {
+            pTask = new CEchoTask(m_iEpollFd, ev.data.fd, ev.events);
+        }
         pTask->AddPackage(pPackage);
 
         if(errno == EAGAIN)
@@ -136,25 +146,6 @@ void CEpollHandler::DoRead(epoll_event ev)
 
 void CEpollHandler::DoWrite(char* data)
 {                
-    /*
-    sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);  
-    int nwrite, data_size = strlen(buf);  
-    n = data_size;  
-    while (n > 0) 
-    {  
-        nwrite = write(fd, buf + data_size - n, n);  
-        if (nwrite < n) 
-        {  
-            if (nwrite == -1 && errno != EAGAIN) 
-            {  
-                perror("write error");  
-            }  
-            break;  
-        }  
-        n -= nwrite;  
-    }  
-    close(fd);
-    */
     CEchoTask* pTask = (CEchoTask*)data;
     char* buf = pTask->GetOutPackage()->GetData();
     int nwrite = 0, data_size = pTask->GetOutPackage()->GetLength();  
@@ -173,8 +164,10 @@ void CEpollHandler::DoWrite(char* data)
             break;  
         }  
         n -= nwrite;  
-    }  
-    close(fd);
+    } 
+    m_ev.data.fd = fd;
+    m_ev.events = EPOLLIN | EPOLLET;
+    epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, fd, &m_ev);
     delete pTask;
 }
 
@@ -196,9 +189,9 @@ int CEpollHandler::StartEpoll()
         }  
         for (fdIndex = 0; fdIndex < m_iNfds; ++fdIndex) 
         {
-            fd = events[fdIndex].data.fd;  
+            fd = events[fdIndex].data.fd;
             if (fd == m_iListenFd) 
-            {  
+            { 
                 DoAccept();
                 continue;  
             }    

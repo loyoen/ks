@@ -7,6 +7,7 @@
  **/
 #include "CKPackage.h"
 #include "CKMemMgr.h"
+#include <iostream>
 
 namespace ks
 {

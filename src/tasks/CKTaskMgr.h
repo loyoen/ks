@@ -12,8 +12,9 @@
 #ifndef  __CKTASKMGR_H_
 #define  __CKTASKMGR_H_
 
-#include <queue>
 #include "CTask.h"
+#include <queue>
+#include <pthread.h>
 
 namespace ks
 {
@@ -45,6 +46,9 @@ public:
 private:
     std::queue<CTask*>  m_Tasks;
     PtrFuncTwo  m_UserCallBackFunc;
+
+    pthread_mutex_t m_MutexHead;
+    pthread_mutex_t m_MutexTail;
 };
 
 }

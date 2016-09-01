@@ -7,6 +7,7 @@
  **/
 
 #include "CKMemMgr.h"
+#include <iostream>
 
 namespace ks
 {
@@ -15,6 +16,8 @@ CMemMgr* CMemMgr::m_pMemMgrInstance = NULL;
 
 CMemMgr::CMemMgr()
 {
+    pthread_mutex_init(&m_MutexHead, NULL);
+    pthread_mutex_init(&m_MutexTail, NULL);
 }
 CMemMgr::~CMemMgr()
 {
@@ -24,6 +27,8 @@ CMemMgr::~CMemMgr()
         m_cQueuePackage.pop();
         delete pPackage;
     }
+    pthread_mutex_destroy(&m_MutexHead);
+    pthread_mutex_destroy(&m_MutexTail);
 }
 
 void CMemMgr::Init(CConfig* pConfig)
@@ -41,39 +46,30 @@ void CMemMgr::Init(CConfig* pConfig)
 void CMemMgr::Push(CPackage* pPackage)
 {
     //lock
+    pthread_mutex_lock(&m_MutexTail);
     m_cQueuePackage.push(pPackage);
+    pthread_mutex_unlock(&m_MutexTail);
 }
     
 CPackage* CMemMgr::Pull()
 {
-    //another lock
     if(m_cQueuePackage.empty())
+    {
         return NULL;
+    }
 
-    CPackage* pPackage = m_cQueuePackage.front();
-    m_cQueuePackage.pop();
-
+    CPackage* pPackage = NULL;
+    
+    pthread_mutex_lock(&m_MutexHead);
+    if(!m_cQueuePackage.empty())
+    {
+        pPackage = m_cQueuePackage.front();
+        m_cQueuePackage.pop();
+    }
+    pthread_mutex_unlock(&m_MutexHead);
+    
     return pPackage;
 }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

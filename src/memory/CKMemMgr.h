@@ -15,6 +15,7 @@
 #include "../config/CKConfig.h"
 #include "CKPackage.h"
 #include <queue>
+#include <pthread.h>
 
 namespace ks
 {
@@ -39,9 +40,9 @@ public:
     CPackage* Pull();
 
 private:
-    //std::queue<CSock*>      m_cQueueSock;       //head and tail lock LRU
     std::queue<CPackage*>   m_cQueuePackage;    //head and tail lock
-
+    pthread_mutex_t         m_MutexHead;
+    pthread_mutex_t         m_MutexTail;
 };
 
 }

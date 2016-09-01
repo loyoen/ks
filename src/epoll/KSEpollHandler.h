@@ -47,7 +47,7 @@ private:
 
     int DoWait(epoll_event* events);
     void DoAccept();
-    void DoRead(epoll_event ev);
+    void DoRead(epoll_event& ev);
     void DoWrite(char* data);
 
 private:
