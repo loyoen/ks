@@ -2,5 +2,7 @@
 ks server framework
 <br>
 
-* epoll相关要再封装 现在调用太乱了
-* 队列加锁todo
+##TODO
+* 内存管理部分修改：package模型优化
+* 压力测试
+* HttpParser
