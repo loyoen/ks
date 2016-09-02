@@ -1,6 +1,6 @@
 /**
  * @file KSEpollCtlBase.cpp
- * @author luoyongen(com@baidu.com)
+ * @author loyoen(com@gmail.com)
  * @date 2016/09/02 16:42:59
  * @brief 
  *  

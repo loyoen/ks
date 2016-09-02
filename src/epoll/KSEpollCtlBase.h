@@ -1,6 +1,6 @@
 /**
  * @file KSNetBase.h
- * @author luoyongen(com@baidu.com)
+ * @author loyoen(com@gmail.com)
  * @date 2016/09/02 16:11:19
  * @brief 
  *  
