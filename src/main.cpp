@@ -26,6 +26,7 @@ int main()
     pServer->Init();
     pServer->SetUserCallBackFunc(test_call_back);
     pServer->Run();
+    delete pServer;
     return 0;
 }
 
