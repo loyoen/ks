@@ -13,6 +13,7 @@
 #define  __CTASK_H_
 
 #include "../memory/CKPackage.h"
+#include "../epoll/KSEpollCtlBase.h"
 #include <vector>
 
 namespace ks
@@ -26,10 +27,10 @@ public:
     virtual void AddPackage(CPackage* pPackage) = 0;
 };
 
-class CEchoTask : public CTask
+class CEchoTask : public CTask, public CEpollCtlBase
 {
 public:
-    CEchoTask(int epfd, int fd, int events);
+    CEchoTask(int epfd, int fd);
     ~CEchoTask();
 
     virtual void Run();
@@ -43,9 +44,6 @@ public:
 private:
     std::vector<CPackage*>  m_Packages;
     CPackage*               m_OutPackage; 
-    int                     m_iFd;
-    int                     m_iEpollFd;
-    int                     m_iEvents;
 };
 
 }

@@ -9,18 +9,14 @@
 #include "CTask.h"
 #include "../memory/CKMemMgr.h"
 #include "CKTaskMgr.h"
-#include <sys/epoll.h>  
-#include <fcntl.h>  
 #include <iostream>
 
 namespace ks
 {
 
-CEchoTask::CEchoTask(int epfd, int fd, int events)
+CEchoTask::CEchoTask(int epfd, int fd)
+    : CEpollCtlBase(epfd, fd)
 {
-    m_iEpollFd = epfd;
-    m_iFd = fd;
-    m_iEvents = events;
     m_OutPackage = NULL;
 }
 CEchoTask::~CEchoTask()
@@ -57,12 +53,7 @@ void CEchoTask::Run()
 
 void CEchoTask::CallBack()
 {
-    struct epoll_event ev;
-    ev.data.fd = m_iFd;
-    ev.events = EPOLLOUT | EPOLLET;
-    ev.data.ptr = this;
-
-    if (epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, m_iFd, &ev) == -1) 
+    if (SetEpollOut(m_iFd, this) == -1) 
     {  
         perror("epoll_ctl: mod");  
     }

@@ -14,6 +14,7 @@
 
 #include "../thread/Thread.h"
 #include "../config/CKConfig.h"
+#include "KSEpollCtlBase.h"
 #include <sys/socket.h>  
 #include <sys/wait.h>  
 #include <netinet/in.h>  
@@ -32,7 +33,7 @@
 namespace ks
 {
 
-class CEpollHandler : public CThreadHandler
+class CEpollHandler : public CThreadHandler, public CEpollCtlBase
 {
 public:
     CEpollHandler(CConfig* pConfig);
@@ -47,22 +48,18 @@ private:
 
     int DoWait(epoll_event* events);
     void DoAccept();
-    void DoRead(epoll_event& ev);
+    void DoRead(int fd);
     void DoWrite(char* data);
 
 private:
     size_t  m_iMaxEvents;
     size_t  m_iPort;
-    int     m_iListenFd;
-    int     m_iEpollFd;
 
     int     m_iNfds;
     int     m_iCurConnSock;
 
-    sockaddr_in  m_local;
     sockaddr_in  m_remote;
     int     m_addrlen;
-    epoll_event  m_ev;
 };
 
 

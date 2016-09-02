@@ -61,12 +61,10 @@ int CEpollHandler::DoWait(epoll_event* events)
 
 void CEpollHandler::DoAccept()
 {
-    while ((m_iCurConnSock = accept(m_iListenFd,(struct sockaddr *) &m_remote, (size_t*)&m_addrlen)) > 0) 
+    while ((m_iCurConnSock = accept(m_iFd,(struct sockaddr *) &m_remote, (size_t*)&m_addrlen)) > 0) 
     {  
         SetNonBlocking(m_iCurConnSock);  
-        m_ev.events = EPOLLIN | EPOLLET;  
-        m_ev.data.fd = m_iCurConnSock;  
-        if (epoll_ctl(m_iEpollFd, EPOLL_CTL_ADD, m_iCurConnSock, &m_ev) == -1) 
+        if (SetEpollAdd(m_iCurConnSock) == -1) 
         {  
             perror("epoll_ctl: add");  
             exit(EXIT_FAILURE);  
@@ -79,7 +77,7 @@ void CEpollHandler::DoAccept()
     }
 }
 
-void CEpollHandler::DoRead(epoll_event& ev)
+void CEpollHandler::DoRead(int fd)
 {
     int nindex = 0, nread = 0, nleft = 0;
     
@@ -98,7 +96,7 @@ void CEpollHandler::DoRead(epoll_event& ev)
         
         readbuf = (char*)pPackage->GetData();
         nleft = pPackage->GetInitLength();
-        while ((nread = read(ev.data.fd, readbuf + nindex, nleft)) > 0) 
+        while ((nread = read(fd, readbuf + nindex, nleft)) > 0) 
         {  
             nindex += nread;
             nleft -= nread;
@@ -108,8 +106,9 @@ void CEpollHandler::DoRead(epoll_event& ev)
 
         if(nread == 0)
         {
-            epoll_ctl(m_iEpollFd, EPOLL_CTL_DEL, ev.data.fd, &ev);
-            close(ev.data.fd);
+            SetEpollDel(fd);
+            close(fd);
+            
             if(pTask != NULL)
                 delete pTask;
             pPackage->Release();
@@ -129,7 +128,7 @@ void CEpollHandler::DoRead(epoll_event& ev)
         
         if(NULL == pTask)
         {
-            pTask = new CEchoTask(m_iEpollFd, ev.data.fd, ev.events);
+            pTask = new CEchoTask(m_iEpollFd, fd);
         }
         pTask->AddPackage(pPackage);
 
@@ -164,10 +163,9 @@ void CEpollHandler::DoWrite(char* data)
             break;  
         }  
         n -= nwrite;  
-    } 
-    m_ev.data.fd = fd;
-    m_ev.events = EPOLLIN | EPOLLET;
-    epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, fd, &m_ev);
+    }
+
+    SetEpollIn(fd); 
     delete pTask;
 }
 
@@ -190,14 +188,14 @@ int CEpollHandler::StartEpoll()
         for (fdIndex = 0; fdIndex < m_iNfds; ++fdIndex) 
         {
             fd = events[fdIndex].data.fd;
-            if (fd == m_iListenFd) 
+            if (fd == m_iFd) 
             { 
                 DoAccept();
                 continue;  
             }    
             if (events[fdIndex].events & EPOLLIN) 
             {  
-                DoRead(events[fdIndex]);
+                DoRead(fd);
             }
             else if (events[fdIndex].events & EPOLLOUT) 
             {
@@ -214,22 +212,22 @@ void CEpollHandler::InitEnv()
 {
     struct sockaddr_in local;  
   
-    if( (m_iListenFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {  
+    if( (m_iFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {  
         perror("sockfd\n");  
         exit(1);  
     }  
 
-    SetNonBlocking(m_iListenFd);  
+    SetNonBlocking(m_iFd);  
     
     bzero(&local, sizeof(local));  
     local.sin_family = AF_INET;  
     local.sin_addr.s_addr = htonl(INADDR_ANY);;  
     local.sin_port = htons(m_iPort);  
-    if( bind(m_iListenFd, (struct sockaddr *) &local, sizeof(local)) < 0) {  
+    if( bind(m_iFd, (struct sockaddr *) &local, sizeof(local)) < 0) {  
         perror("bind\n");  
         exit(1);  
     }  
-    listen(m_iListenFd, 20);
+    listen(m_iFd, 20);
 
     
     m_iEpollFd = epoll_create(m_iMaxEvents);  
@@ -239,10 +237,7 @@ void CEpollHandler::InitEnv()
         exit(EXIT_FAILURE);  
     }  
     
-    struct epoll_event ev;
-    ev.events = EPOLLIN|EPOLLET;  
-    ev.data.fd = m_iListenFd;  
-    if (epoll_ctl(m_iEpollFd, EPOLL_CTL_ADD, m_iListenFd, &ev) == -1) 
+    if (SetEpollAdd(m_iFd) == -1) 
     {  
         perror("epoll_ctl: listen_sock");  
         exit(EXIT_FAILURE);  
