@@ -18,6 +18,12 @@
 namespace ks
 {
 
+#define LOG_DEBUG(fmt, ...) CLogger::LogPrint(LEVEL_DEBUG, fmt, ##__VA_ARGS__)
+#define LOG_INFO(fmt, ...)  CLogger::LogPrint(LEVEL_INFO, fmt, ##__VA_ARGS__)
+#define LOG_WARN(fmt, ...)  CLogger::LogPrint(LEVEL_WARN, fmt, ##__VA_ARGS__)
+#define LOG_ERROR(fmt, ...) CLogger::LogPrint(LEVEL_ERROR, fmt, ##__VA_ARGS__)
+#define LOG_FATAL(fmt, ...) CLogger::LogPrint(LEVEL_FATAL, fmt, ##__VA_ARGS__)
+
 static const int    MAX_STR_LINE    = 1024;
 static const char*  DEBUG_PREFIX    = " DEBUG: ";
 static const char*  INFO_PREFIX     = " INFO: ";

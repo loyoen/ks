@@ -68,7 +68,7 @@ void CLogger::LogPrint(LogLevel level, const char* fmt, ...)
     }
     char* sLogLine = new char[MAX_STR_LINE];
     pLogger->GetCurrentTime(sLogLine);
-    switch(curLevel)
+    switch(level)
     {
     case LEVEL_DEBUG:
         strcat(sLogLine, DEBUG_PREFIX);
