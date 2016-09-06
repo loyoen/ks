@@ -12,9 +12,11 @@
 namespace ks
 {
 
-CTaskMgr* CTaskMgr::m_pTaskMgrInstance = NULL;
-
 CTaskMgr::CTaskMgr()
+{
+}
+
+void CTaskMgr::Init()
 {
     pthread_mutex_init(&m_MutexHead, NULL);
     pthread_mutex_init(&m_MutexTail, NULL);
@@ -58,16 +60,6 @@ CTask* CTaskMgr::GetTask()
     }
     pthread_mutex_unlock(&m_MutexHead);
     return pTask;
-}
-
-void CTaskMgr::SetUserCallBackFunc(PtrFuncTwo func)
-{
-    m_UserCallBackFunc = func;
-}
-
-PtrFuncTwo CTaskMgr::GetUserCallBackFunc()
-{
-    return m_UserCallBackFunc;
 }
 
 }

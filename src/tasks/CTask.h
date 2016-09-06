@@ -24,7 +24,6 @@ class CTask
 public:
     virtual void Run() = 0;
     virtual void CallBack() = 0;
-    virtual void AddPackage(CPackage* pPackage) = 0;
 };
 
 class CEchoTask : public CTask, public CEpollCtlBase
@@ -44,6 +43,30 @@ public:
 private:
     std::vector<CPackage*>  m_Packages;
     CPackage*               m_OutPackage; 
+};
+
+class CIOTask : public CTask
+{
+public:
+    CIOTask();
+    ~CIOTask();
+
+    virtual void Run(){};
+    virtual void CallBack(){};
+
+protected:
+    void* m_pData;
+    size_t m_iLen;
+};
+
+class CLogTask : public CIOTask
+{
+public:
+    CLogTask(char* line);
+    ~CLogTask();
+
+    virtual void Run();
+    virtual void CallBack();
 };
 
 }

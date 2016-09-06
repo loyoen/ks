@@ -8,6 +8,7 @@
 
 #include "CKThreadPool.h"
 #include "../tasks/TaskHandler.h"
+#include "../tasks/CKReqTaskMgr.h"
 
 namespace ks
 {
@@ -37,9 +38,11 @@ void CThreadMgr::Init(CConfig* pConfig)
 
 bool CThreadMgr::ActivateThreadPool()
 {
+    CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
+
     for(int index=0; index<m_iThreadNum; index++)
     {
-        CThreadHandler* pHandler = new CTaskHandler();
+        CThreadHandler* pHandler = new CTaskHandler(pTaskMgr);
         CThread* pThread = new CThread(pHandler);
         m_Threads.push_back(pThread);
     }

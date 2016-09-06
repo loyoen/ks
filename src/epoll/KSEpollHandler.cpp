@@ -8,7 +8,7 @@
 
 #include "KSEpollHandler.h"
 #include "../memory/CKMemMgr.h"
-#include "../tasks/CKTaskMgr.h"
+#include "../tasks/CKReqTaskMgr.h"
 #include <iostream>
 
 namespace ks
@@ -84,7 +84,7 @@ void CEpollHandler::DoRead(int fd)
     CMemMgr* pMemMgr = CMemMgr::GetMemMgr(); 
     CPackage* pPackage = NULL;
     char* readbuf = NULL;
-    CTask* pTask = NULL;
+    CEchoTask* pTask = NULL;
     
     do
     {
@@ -139,7 +139,7 @@ void CEpollHandler::DoRead(int fd)
 
     }while(true);
     
-    CTaskMgr* pTaskMgr = CTaskMgr::GetTaskMgr();
+    CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
 }
 

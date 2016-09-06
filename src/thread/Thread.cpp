@@ -19,6 +19,11 @@ CThread::CThread(CThreadHandler* pHandler)
 
 CThread::~CThread()
 {
+    if(m_pHandler)
+    {
+        delete m_pHandler;
+        m_pHandler = NULL;
+    }
 }
 
 void* ThreadProc(void* lpParameter)

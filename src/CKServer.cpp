@@ -23,7 +23,9 @@ CKServer::CKServer()
  : m_pConfig(NULL)
  , m_pMemMgr(NULL)
  , m_pThreadMgr(NULL)
- , m_pTaskMgr(NULL)
+ , m_pReqTaskMgr(NULL)
+ , m_pIOTaskMgr(NULL)
+ , m_pLogger(NULL)
 {
 }
 
@@ -44,10 +46,20 @@ CKServer::~CKServer()
         delete m_pThreadMgr;
         m_pThreadMgr = NULL;
     }
-    if(NULL != m_pTaskMgr)
+    if(NULL != m_pReqTaskMgr)
     {
-        delete m_pTaskMgr;
-        m_pTaskMgr = NULL;
+        delete m_pReqTaskMgr;
+        m_pReqTaskMgr = NULL;
+    }
+    if(NULL != m_pIOTaskMgr)
+    {
+        delete m_pIOTaskMgr;
+        m_pIOTaskMgr = NULL;
+    }
+    if(NULL != m_pLogger)
+    {
+        delete m_pLogger;
+        m_pLogger = NULL;
     }
 }
 
@@ -56,12 +68,17 @@ void CKServer::Init()
     m_pConfig = CConfig::GetConfig();
     m_pMemMgr = CMemMgr::GetMemMgr();
     m_pThreadMgr = CThreadMgr::GetThreadMgr();
-    m_pTaskMgr = CTaskMgr::GetTaskMgr();
+    m_pReqTaskMgr = CReqTaskMgr::GetTaskMgr();
+    m_pIOTaskMgr = CIOTaskMgr::GetTaskMgr();
+    m_pLogger = CLogger::GetLogger();
+
 
     m_pConfig->Init();
     m_pMemMgr->Init(m_pConfig);
     m_pThreadMgr->Init(m_pConfig);
-    m_pTaskMgr->Init();
+    m_pReqTaskMgr->Init();
+    m_pIOTaskMgr->Init();
+    m_pLogger->Init();
 
     m_pThreadMgr->ActivateThreadPool();
 }
@@ -76,11 +93,11 @@ void CKServer::Run()
 
 void CKServer::SetUserCallBackFunc(PtrFuncTwo func)
 {
-    if(m_pTaskMgr == NULL)
+    if(m_pReqTaskMgr == NULL)
     {
-        m_pTaskMgr = CTaskMgr::GetTaskMgr();
+        m_pReqTaskMgr = CReqTaskMgr::GetTaskMgr();
     }
-    m_pTaskMgr->SetUserCallBackFunc(func);
+    m_pReqTaskMgr->SetUserCallBackFunc(func);
 }
 
 }

@@ -8,8 +8,8 @@
 
 #include "CTask.h"
 #include "../memory/CKMemMgr.h"
-#include "CKTaskMgr.h"
-#include <iostream>
+#include "CKReqTaskMgr.h"
+#include "../log/KSLog.h"
 
 namespace ks
 {
@@ -48,7 +48,7 @@ void CEchoTask::Run()
         perror("memory error");
         return;
     }
-    (*CTaskMgr::GetTaskMgr()->GetUserCallBackFunc())(m_Packages[0], m_OutPackage);
+    (*CReqTaskMgr::GetTaskMgr()->GetUserCallBackFunc())(m_Packages[0], m_OutPackage);
 }
 
 void CEchoTask::CallBack()
@@ -59,5 +59,32 @@ void CEchoTask::CallBack()
     }
 }
 
+CIOTask::CIOTask()
+{
+    m_pData = NULL;
+    m_iLen = 0;
+}
+CIOTask::~CIOTask()
+{
+}
+
+CLogTask::CLogTask(char* line)
+{
+    m_pData = (void*)line;
+    m_iLen = strlen(line);
+}
+CLogTask::~CLogTask()
+{
+}
+
+void CLogTask::Run()
+{
+    CLogger* pLogger = CLogger::GetLogger();
+    pLogger->Trace(m_pData, m_iLen);
+}
+
+void CLogTask::CallBack()
+{
+}
 
 }

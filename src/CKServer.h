@@ -15,8 +15,10 @@
 #include "./config/CKConfig.h"
 #include "./memory/CKMemMgr.h"
 #include "./thread/CKThreadPool.h"
-#include "./tasks/CKTaskMgr.h"
+#include "./tasks/CKReqTaskMgr.h"
+#include "./tasks/CKIOTaskMgr.h"
 #include "./epoll/KSEpollHandler.h"
+#include "./log/KSLog.h"
 
 namespace ks
 {
@@ -35,7 +37,9 @@ private:
     CConfig*        m_pConfig;
     CMemMgr*        m_pMemMgr;
     CThreadMgr*     m_pThreadMgr;
-    CTaskMgr*      m_pTaskMgr;
+    CReqTaskMgr*    m_pReqTaskMgr;
+    CIOTaskMgr*     m_pIOTaskMgr;
+    CLogger*        m_pLogger;
 }; 
 
 }

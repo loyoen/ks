@@ -13,9 +13,10 @@
 namespace ks
 {
 
-CTaskHandler::CTaskHandler()
+CTaskHandler::CTaskHandler(CTaskMgr* pTaskMgr)
 {
     m_bStoped = false;
+    m_pTaskMgr = pTaskMgr;
 }
 CTaskHandler::~CTaskHandler()
 {
@@ -23,10 +24,9 @@ CTaskHandler::~CTaskHandler()
 
 int CTaskHandler::OnThreadProc()
 {
-    CTaskMgr *pTaskMgr = CTaskMgr::GetTaskMgr();
     while(!m_bStoped)
     {
-        CTask* pTask = pTaskMgr->GetTask();
+        CTask* pTask = m_pTaskMgr->GetTask();
         if(pTask != NULL)
         {
             pTask->Run();

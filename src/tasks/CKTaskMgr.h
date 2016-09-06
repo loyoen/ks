@@ -19,33 +19,19 @@
 namespace ks
 {
 
-typedef int (*PtrFuncTwo)(void*, void*);
-
 class CTaskMgr
 {
-private:
-    CTaskMgr();
-    static CTaskMgr* m_pTaskMgrInstance;
-
 public:
-    static CTaskMgr* GetTaskMgr()
-    {
-        if(NULL == m_pTaskMgrInstance)
-            m_pTaskMgrInstance = new CTaskMgr();
-        return m_pTaskMgrInstance;
-    }
+    CTaskMgr();
 
     ~CTaskMgr();
 
-    void Init(){}
+    virtual void Init();
     void AddTask(CTask* pTask);
     CTask* GetTask();
 
-    void SetUserCallBackFunc(PtrFuncTwo func);
-    PtrFuncTwo GetUserCallBackFunc();
 private:
     std::queue<CTask*>  m_Tasks;
-    PtrFuncTwo  m_UserCallBackFunc;
 
     pthread_mutex_t m_MutexHead;
     pthread_mutex_t m_MutexTail;

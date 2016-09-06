@@ -13,6 +13,7 @@
 #define  __TASKHANDLER_H_
 
 #include "../thread/Thread.h"
+#include "CKTaskMgr.h"
 
 namespace ks
 {
@@ -20,10 +21,13 @@ namespace ks
 class CTaskHandler : public CThreadHandler
 {
 public:
-    CTaskHandler();
+    CTaskHandler(CTaskMgr* pTaskMgr);
     ~CTaskHandler();
 
     virtual int OnThreadProc();
+
+private:
+    CTaskMgr* m_pTaskMgr;
 };
 
 }
