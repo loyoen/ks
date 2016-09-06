@@ -110,6 +110,7 @@ void CLogger::Trace(void* data, int iLen)
     }
     fprintf(m_pFileStream, "%s\n", (char*)data);
     fflush(m_pFileStream);
+    delete[] (char*)data;
 }
 
 }
