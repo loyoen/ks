@@ -10,17 +10,16 @@
  '''
 import httplib
 httpClient = None
+httpClient = httplib.HTTPConnection('localhost',8000,timeout=30)
 while True:
     try:
-        httpClient = httplib.HTTPConnection('localhost',8000,timeout=30)
         httpClient.request('get','/')
         response = httpClient.getresponse()
-        print response.status
-        print response.reason
-        print response.read()
+        #print response.status
+        #print response.reason
+        response.read()
         if response.status != 200:
             break
-        httpClient.close()
     except:
         print "e"
         break

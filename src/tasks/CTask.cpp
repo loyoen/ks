@@ -85,6 +85,7 @@ void CLogTask::Run()
 
 void CLogTask::CallBack()
 {
+    delete this;
 }
 
 }
