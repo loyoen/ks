@@ -7,8 +7,9 @@
  **/
 
 #include "CKConfig.h"
+#include "../log/KSLog.h"
 #include <stdlib.h>
-#include <iostream>
+
 namespace ks
 {
 
@@ -26,7 +27,7 @@ void CConfig::Init()
     bool bRet = ReadConfig("../config/ks.cfg");
     if(!bRet)
     {
-        std::cout << "read conf error" << std::endl;
+        LOG_ERROR("read conf error");
     }
 }
 

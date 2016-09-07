@@ -7,7 +7,7 @@
  **/
 
 #include "CKMemMgr.h"
-#include <iostream>
+#include "../log/KSLog.h"
 
 namespace ks
 {
@@ -68,6 +68,10 @@ CPackage* CMemMgr::Pull()
     }
     pthread_mutex_unlock(&m_MutexHead);
     
+    if(NULL == pPackage)
+    {
+        LOG_ERROR("No package left");
+    }
     return pPackage;
 }
 

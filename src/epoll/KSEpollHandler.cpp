@@ -9,7 +9,7 @@
 #include "KSEpollHandler.h"
 #include "../memory/CKMemMgr.h"
 #include "../tasks/CKReqTaskMgr.h"
-#include <iostream>
+#include "../log/KSLog.h"
 
 namespace ks
 {
@@ -37,13 +37,13 @@ void CEpollHandler::SetNonBlocking(int sockfd)
     int opts = fcntl(sockfd, F_GETFL);  
     if(opts < 0) 
     {  
-        perror("fcntl(F_GETFL)\n");  
+        LOG_FATAL("fcntl(F_GETFL) SetNonBlocking Error");  
         exit(1);  
     }  
     opts = (opts | O_NONBLOCK);  
     if(fcntl(sockfd, F_SETFL, opts) < 0) 
     {  
-        perror("fcntl(F_SETFL)\n");  
+        LOG_FATAL("fcntl(F_SETFL) SetNonBlocking Error");  
         exit(1);  
     }
 }
@@ -53,7 +53,7 @@ int CEpollHandler::DoWait(epoll_event* events)
     m_iNfds = epoll_wait(m_iEpollFd, events, m_iMaxEvents, -1);
     if (m_iNfds == -1) 
     {  
-        perror("epoll_pwait");  
+        LOG_FATAL("epoll_pwait Error");  
         exit(EXIT_FAILURE);  
     }
     return m_iNfds;
@@ -66,14 +66,14 @@ void CEpollHandler::DoAccept()
         SetNonBlocking(m_iCurConnSock);  
         if (SetEpollAdd(m_iCurConnSock) == -1) 
         {  
-            perror("epoll_ctl: add");  
+            LOG_FATAL("epoll_ctl: add");  
             exit(EXIT_FAILURE);  
         }  
     }  
     if (m_iCurConnSock == -1) 
     {  
         if (errno != EAGAIN && errno != ECONNABORTED && errno != EPROTO && errno != EINTR)   
-            perror("accept");  
+            LOG_ERROR("accept Error");  
     }
 }
 
@@ -117,7 +117,7 @@ void CEpollHandler::DoRead(int fd)
 
         if (nread == -1 && errno != EAGAIN) 
         {
-            perror("read error");
+            LOG_ERROR("read error");
             if(pTask != NULL)
                 delete pTask;
             pPackage->Release();
@@ -158,7 +158,7 @@ void CEpollHandler::DoWrite(char* data)
         {  
             if (nwrite == -1 && errno != EAGAIN) 
             {  
-                perror("write error");  
+                LOG_ERROR("write error");  
             }  
             break;  
         }  
@@ -182,7 +182,7 @@ int CEpollHandler::StartEpoll()
 
         if (m_iNfds == -1) 
         {  
-            perror("epoll_pwait");  
+            LOG_FATAL("epoll_pwait");  
             exit(EXIT_FAILURE);  
         }  
         for (fdIndex = 0; fdIndex < m_iNfds; ++fdIndex) 
@@ -213,7 +213,7 @@ void CEpollHandler::InitEnv()
     struct sockaddr_in local;  
   
     if( (m_iFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {  
-        perror("sockfd\n");  
+        LOG_FATAL("sockfd\n");  
         exit(1);  
     }  
 
@@ -224,7 +224,7 @@ void CEpollHandler::InitEnv()
     local.sin_addr.s_addr = htonl(INADDR_ANY);;  
     local.sin_port = htons(m_iPort);  
     if( bind(m_iFd, (struct sockaddr *) &local, sizeof(local)) < 0) {  
-        perror("bind\n");  
+        LOG_FATAL("bind\n");  
         exit(1);  
     }  
     listen(m_iFd, 20);
@@ -233,13 +233,13 @@ void CEpollHandler::InitEnv()
     m_iEpollFd = epoll_create(m_iMaxEvents);  
     if (m_iEpollFd == -1) 
     {  
-        perror("epoll_create");  
+        LOG_FATAL("epoll_create");  
         exit(EXIT_FAILURE);  
     }  
     
     if (SetEpollAdd(m_iFd) == -1) 
     {  
-        perror("epoll_ctl: listen_sock");  
+        LOG_FATAL("epoll_ctl: listen_sock");  
         exit(EXIT_FAILURE);  
     }  
 }
