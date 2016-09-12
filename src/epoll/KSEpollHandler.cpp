@@ -106,6 +106,7 @@ void CEpollHandler::DoRead(int fd)
 
         if(nread == 0)
         {
+            //LOG_INFO("close fd");
             SetEpollDel(fd);
             close(fd);
             
