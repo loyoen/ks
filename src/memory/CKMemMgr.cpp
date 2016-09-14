@@ -8,6 +8,7 @@
 
 #include "CKMemMgr.h"
 #include "../log/KSLog.h"
+#include <iostream>
 
 namespace ks
 {
@@ -55,6 +56,7 @@ CPackage* CMemMgr::Pull()
 {
     if(m_cQueuePackage.empty())
     {
+        std::cout << "pull empty" << std::endl;
         return NULL;
     }
 
@@ -70,6 +72,7 @@ CPackage* CMemMgr::Pull()
     
     if(NULL == pPackage)
     {
+        std::cout << "pull empty" << std::endl;
         LOG_ERROR("No package left");
     }
     return pPackage;

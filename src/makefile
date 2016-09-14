@@ -1,7 +1,7 @@
 default : all
 all : ks
 ks : main.o CKServer.o CKConfig.o CKMemMgr.o CKPackage.o CKThreadPool.o Thread.o CKReqTaskMgr.o CKIOTaskMgr.o CKTaskMgr.o CTask.o TaskHandler.o KSEpollHandler.o KSEpollCtlBase.o KSLog.o
-	g++ -o ks main.o CKServer.o CKConfig.o CKMemMgr.o CKPackage.o CKThreadPool.o Thread.o CKReqTaskMgr.o CKIOTaskMgr.o CKTaskMgr.o CTask.o TaskHandler.o KSEpollHandler.o KSEpollCtlBase.o KSLog.o -lpthread
+	g++ -o ks -fstack-protector -fstack-protector-all -g main.o CKServer.o CKConfig.o CKMemMgr.o CKPackage.o CKThreadPool.o Thread.o CKReqTaskMgr.o CKIOTaskMgr.o CKTaskMgr.o CTask.o TaskHandler.o KSEpollHandler.o KSEpollCtlBase.o KSLog.o -lpthread
 main.o : main.cpp CKServer.h
 	g++ -c main.cpp
 CKServer.o : CKServer.cpp CKServer.h ./config/CKConfig.h ./memory/CKMemMgr.h ./thread/CKThreadPool.h ./tasks/CKTaskMgr.h

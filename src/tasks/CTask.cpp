@@ -10,6 +10,8 @@
 #include "../memory/CKMemMgr.h"
 #include "CKReqTaskMgr.h"
 #include "../log/KSLog.h"
+#include <errno.h>   
+#include <iostream>
 
 namespace ks
 {
@@ -17,7 +19,7 @@ namespace ks
 CEchoTask::CEchoTask(int epfd, int fd)
     : CEpollCtlBase(epfd, fd)
 {
-    m_OutPackage = NULL;
+    m_OutPackage = CMemMgr::GetMemMgr()->Pull();
 }
 CEchoTask::~CEchoTask()
 {
@@ -42,10 +44,8 @@ void CEchoTask::AddPackage(CPackage* pPackage)
 
 void CEchoTask::Run()
 {
-    m_OutPackage = CMemMgr::GetMemMgr()->Pull();
     if(NULL == m_OutPackage)
     {
-        perror("memory error");
         return;
     }
     (*CReqTaskMgr::GetTaskMgr()->GetUserCallBackFunc())(m_Packages[0], m_OutPackage);
@@ -53,6 +53,11 @@ void CEchoTask::Run()
 
 void CEchoTask::CallBack()
 {
+    if(m_OutPackage == NULL)
+    {
+        delete this;
+        return;
+    }
     if (SetEpollOut(m_iFd, this) == -1) 
     {  
         perror("epoll_ctl: mod");  
@@ -84,6 +89,131 @@ void CLogTask::Run()
 }
 
 void CLogTask::CallBack()
+{
+    delete this;
+}
+
+CReadTask::CReadTask(int epfd,int fd)
+ : CEpollCtlBase(epfd,fd)
+{
+}
+CReadTask::~CReadTask()
+{
+}
+
+void CReadTask::Run()
+{
+    int nindex = 0, nread = 0, nleft = 0;
+    
+    CMemMgr* pMemMgr = CMemMgr::GetMemMgr(); 
+    CPackage* pPackage = NULL;
+    char* readbuf = NULL;
+    CEchoTask* pTask = NULL;
+    
+    do
+    {
+        nindex = 0;
+        nread = 0;
+        pPackage = pMemMgr->Pull();
+        if(NULL == pPackage)
+            return;
+        
+        readbuf = (char*)pPackage->GetData();
+        nleft = pPackage->GetInitLength();
+        while ((nread = read(m_iFd, readbuf + nindex, nleft)) > 0) 
+        {  
+            nindex += nread;
+            nleft -= nread;
+            if(0 == nleft)
+                break;
+        }
+
+        if(nread == 0)
+        {
+            LOG_INFO("close fd");
+            SetEpollDel(m_iFd);
+            close(m_iFd);
+            
+            if(pTask != NULL)
+                delete pTask;
+            pPackage->Release();
+            return;
+        }
+
+        if (nread == -1 && errno != EAGAIN) 
+        {
+            LOG_ERROR("read error");
+            if(pTask != NULL)
+                delete pTask;
+            pPackage->Release();
+            return;
+        }
+
+        pPackage->SetLength(nindex);
+        
+        if(NULL == pTask)
+        {
+            pTask = new CEchoTask(m_iEpollFd, m_iFd);
+        }
+        pTask->AddPackage(pPackage);
+
+        if(errno == EAGAIN)
+        {
+            break;
+        }
+
+    }while(true);
+    
+    CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
+    pTaskMgr->AddTask(pTask);
+}
+
+void CReadTask::CallBack()
+{
+    delete this;
+}
+
+CWriteTask::CWriteTask(CEchoTask* pTask, int epfd, int fd)
+ : CEpollCtlBase(epfd,fd)
+{
+    m_pEchoTask = pTask;
+}
+
+CWriteTask::~CWriteTask()
+{
+}
+
+void CWriteTask::Run()
+{
+    if(m_pEchoTask->GetOutPackage() == NULL)
+    {
+        std::cout << "NO PACKAGE" << std::endl;
+    }
+    char* buf = m_pEchoTask->GetOutPackage()->GetData();
+    int nwrite = 0, data_size = m_pEchoTask->GetOutPackage()->GetLength();  
+    int n = data_size;
+    int fd = m_pEchoTask->GetFd();
+
+    while (n > 0) 
+    {  
+        nwrite = write(fd, buf + data_size - n, n);  
+        if (nwrite < n) 
+        {  
+            if (nwrite == -1 && errno != EAGAIN) 
+            {  
+                LOG_ERROR("write error");  
+            }  
+            break;  
+        }  
+        n -= nwrite;  
+    }
+
+    SetEpollIn(fd); 
+    delete m_pEchoTask;
+    m_pEchoTask = NULL;
+}
+
+void CWriteTask::CallBack()
 {
     delete this;
 }

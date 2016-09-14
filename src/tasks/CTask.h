@@ -69,6 +69,29 @@ public:
     virtual void CallBack();
 };
 
+class CReadTask : public CTask, public CEpollCtlBase
+{
+public:
+    CReadTask(int epfd,int fd);
+    ~CReadTask();
+
+    virtual void Run();
+    virtual void CallBack();
+};
+
+class CWriteTask : public CTask, public CEpollCtlBase
+{
+public:
+    CWriteTask(CEchoTask* pTask, int epfd, int fd);
+    ~CWriteTask();
+
+    virtual void Run();
+    virtual void CallBack();
+
+private:
+    CEchoTask*  m_pEchoTask;
+};
+
 }
 
 
