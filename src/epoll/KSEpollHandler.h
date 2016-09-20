@@ -49,7 +49,7 @@ private:
     int DoWait(epoll_event* events);
     void DoAccept();
     void DoRead(int fd);
-    void DoWrite(char* data);
+    void DoWrite(void* data);
 
 private:
     size_t  m_iMaxEvents;

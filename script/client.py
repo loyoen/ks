@@ -11,7 +11,7 @@
 import httplib
 httpClient = None
 i = 0
-while True:
+if True:
     try:
         httpClient = httplib.HTTPConnection('localhost',8000,timeout=30)
         httpClient.request('get','/')
@@ -22,11 +22,11 @@ while True:
         i += 1
         print i
         if response.status != 200:
-            break
+            print "err"
         httpClient.close()
     except:
         print "e"
-        break
+        #break
 #if httpClient:
 #    httpClient.close()
 

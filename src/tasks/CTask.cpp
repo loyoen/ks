@@ -27,7 +27,8 @@ CEchoTask::~CEchoTask()
     {
         m_Packages[i]->Release();
     }
-    m_Packages.clear();
+    std::vector<CPackage*>().swap(m_Packages);
+    //m_Packages.clear();
     
     if(m_OutPackage != NULL)
     {
@@ -116,8 +117,10 @@ void CReadTask::Run()
         nread = 0;
         pPackage = pMemMgr->Pull();
         if(NULL == pPackage)
+        {
+            std::cout << "read no package fd=" << m_iFd << std::endl;
             return;
-        
+        }
         readbuf = (char*)pPackage->GetData();
         nleft = pPackage->GetInitLength();
         while ((nread = read(m_iFd, readbuf + nindex, nleft)) > 0) 
@@ -137,6 +140,7 @@ void CReadTask::Run()
             if(pTask != NULL)
                 delete pTask;
             pPackage->Release();
+            std::cout << "nread = 0 fd = " << m_iFd << std::endl;
             return;
         }
 
@@ -146,6 +150,7 @@ void CReadTask::Run()
             if(pTask != NULL)
                 delete pTask;
             pPackage->Release();
+            std::cout << "read error fd=" << m_iFd << std::endl;
             return;
         }
 
@@ -163,7 +168,7 @@ void CReadTask::Run()
         }
 
     }while(true);
-    
+    std::cout << "read end task" << std::endl;    
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
 }
@@ -185,6 +190,11 @@ CWriteTask::~CWriteTask()
 
 void CWriteTask::Run()
 {
+    if(NULL == m_pEchoTask)
+    {
+        return;
+    }
+
     if(m_pEchoTask->GetOutPackage() == NULL)
     {
         std::cout << "NO PACKAGE" << std::endl;
@@ -201,16 +211,21 @@ void CWriteTask::Run()
         {  
             if (nwrite == -1 && errno != EAGAIN) 
             {  
-                LOG_ERROR("write error");  
-            }  
-            break;  
+                LOG_ERROR("write error");
+                break;  
+            }    
         }  
         n -= nwrite;  
     }
 
-    SetEpollIn(fd); 
-    delete m_pEchoTask;
-    m_pEchoTask = NULL;
+    SetEpollDel(fd);
+    close(fd);
+
+    if(m_pEchoTask != NULL) 
+    {
+        delete m_pEchoTask;
+        m_pEchoTask = NULL;
+    }
 }
 
 void CWriteTask::CallBack()

@@ -30,7 +30,6 @@ int CEpollCtlBase::SetEpollIn(int fd)
 int CEpollCtlBase::SetEpollOut(int fd, void* ptr)
 {
     m_ev.events = EPOLLOUT | EPOLLET;
-    m_ev.data.fd = fd;
     m_ev.data.ptr = ptr;
     return epoll_ctl(m_iEpollFd, EPOLL_CTL_MOD, fd, &m_ev);
 }
@@ -44,7 +43,7 @@ int CEpollCtlBase::SetEpollAdd(int fd)
 
 int CEpollCtlBase::SetEpollDel(int fd)
 {
-    m_ev.events = EPOLLIN | EPOLLET;
+    m_ev.events = 0;;
     m_ev.data.fd = fd;
     return epoll_ctl(m_iEpollFd, EPOLL_CTL_DEL, fd, &m_ev);
 }

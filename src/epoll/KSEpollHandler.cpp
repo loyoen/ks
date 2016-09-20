@@ -10,6 +10,7 @@
 #include "../memory/CKMemMgr.h"
 #include "../tasks/CKReqTaskMgr.h"
 #include "../log/KSLog.h"
+#include <iostream>
 
 namespace ks
 {
@@ -68,7 +69,7 @@ void CEpollHandler::DoAccept()
         {  
             LOG_FATAL("epoll_ctl: add");  
             exit(EXIT_FAILURE);  
-        }  
+        } 
     }  
     if (m_iCurConnSock == -1) 
     {  
@@ -79,11 +80,11 @@ void CEpollHandler::DoAccept()
 
 void CEpollHandler::DoRead(int fd)
 {
-    /*
+    std::cout << "read from fd= " << fd << std::endl;    
     CReadTask* pTask = new CReadTask(m_iEpollFd,fd);
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
-    */
+    /*
     int nindex = 0, nread = 0, nleft = 0;
     
     CMemMgr* pMemMgr = CMemMgr::GetMemMgr(); 
@@ -111,7 +112,7 @@ void CEpollHandler::DoRead(int fd)
 
         if(nread == 0)
         {
-            LOG_INFO("close fd");
+            //LOG_INFO("close fd");
             SetEpollDel(fd);
             close(fd);
             
@@ -147,22 +148,23 @@ void CEpollHandler::DoRead(int fd)
     
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
+    */
 }
 
-void CEpollHandler::DoWrite(char* data)
-{    
-    /*    
+void CEpollHandler::DoWrite(void* data)
+{        
+    /*
     CEchoTask* pEchoTask = (CEchoTask*)data;
     CWriteTask* pTask = new CWriteTask(pEchoTask,m_iEpollFd, pEchoTask->GetFd());
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
     */
+    
     CEchoTask* pEchoTask = (CEchoTask*)data;
     char* buf = pEchoTask->GetOutPackage()->GetData();
     int nwrite = 0, data_size = pEchoTask->GetOutPackage()->GetLength();  
     int n = data_size;
     int fd = pEchoTask->GetFd();
-
     while (n > 0) 
     {  
         nwrite = write(fd, buf + data_size - n, n);  
@@ -170,14 +172,14 @@ void CEpollHandler::DoWrite(char* data)
         {  
             if (nwrite == -1 && errno != EAGAIN) 
             {  
-                LOG_ERROR("write error");  
+                LOG_ERROR("write error");
+                break;  
             }  
-            break;  
-        }  
-        n -= nwrite;  
+        }
+        n -= nwrite;
     }
-
-    SetEpollIn(fd); 
+    SetEpollDel(fd);
+    close(fd); 
     delete pEchoTask;
 }
 
@@ -211,7 +213,7 @@ int CEpollHandler::StartEpoll()
             }
             else if (events[fdIndex].events & EPOLLOUT) 
             {
-                DoWrite((char*)events[fdIndex].data.ptr);
+                DoWrite(events[fdIndex].data.ptr);
             } 
         }  
     }
