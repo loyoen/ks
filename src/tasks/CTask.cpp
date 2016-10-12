@@ -20,6 +20,10 @@ CEchoTask::CEchoTask(int epfd, int fd)
     : CEpollCtlBase(epfd, fd)
 {
     m_OutPackage = CMemMgr::GetMemMgr()->Pull();
+    if(m_OutPackage == NULL)
+    {
+        std::cout << "no out package" << std::endl;
+    }
 }
 CEchoTask::~CEchoTask()
 {
@@ -56,6 +60,7 @@ void CEchoTask::CallBack()
 {
     if(m_OutPackage == NULL)
     {
+        std::cout << "no no no " << std::endl;
         delete this;
         return;
     }
@@ -140,7 +145,7 @@ void CReadTask::Run()
             if(pTask != NULL)
                 delete pTask;
             pPackage->Release();
-            std::cout << "nread = 0 fd = " << m_iFd << std::endl;
+            //std::cout << "nread = 0 fd = " << m_iFd << std::endl;
             return;
         }
 
@@ -150,7 +155,7 @@ void CReadTask::Run()
             if(pTask != NULL)
                 delete pTask;
             pPackage->Release();
-            std::cout << "read error fd=" << m_iFd << std::endl;
+            std::cout << "read error fd=" << m_iFd << "err=" << errno << std::endl;
             return;
         }
 
@@ -168,7 +173,7 @@ void CReadTask::Run()
         }
 
     }while(true);
-    std::cout << "read end task" << std::endl;    
+    //std::cout << "read end task" << std::endl;    
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
 }
@@ -186,6 +191,11 @@ CWriteTask::CWriteTask(CEchoTask* pTask, int epfd, int fd)
 
 CWriteTask::~CWriteTask()
 {
+    if(m_pEchoTask != NULL) 
+    {
+        delete m_pEchoTask;
+        m_pEchoTask = NULL;
+    }
 }
 
 void CWriteTask::Run()
@@ -195,37 +205,51 @@ void CWriteTask::Run()
         return;
     }
 
-    if(m_pEchoTask->GetOutPackage() == NULL)
+    
+    CPackage* pOutPackage = m_pEchoTask->GetOutPackage();// == NULL ? m_pEchoTask->GetOutPackage() : m_pEchoTask->m_Packages[0];
+    if(pOutPackage == NULL)
     {
         std::cout << "NO PACKAGE" << std::endl;
+        std::cout << "INPUT PACKAGE NUM...." << m_pEchoTask->m_Packages.size() << std::endl;
+        if(m_pEchoTask->m_Packages.size()==0)
+            return;
+        else
+        {
+            std::cout << m_pEchoTask->m_Packages[0]->GetLength() << std::endl;
+        }
+        return;
     }
-    char* buf = m_pEchoTask->GetOutPackage()->GetData();
-    int nwrite = 0, data_size = m_pEchoTask->GetOutPackage()->GetLength();  
+    if(m_pEchoTask->m_Packages[0] == NULL)
+    {
+        std::cout << "NO PACKAGE two" << std::endl;
+        std::cout << "INPUT PACKAGE NUM" << m_pEchoTask->m_Packages.size() << std::endl;
+        return;
+    }
+    char* buf = pOutPackage->GetData();
+    int nwrite = 0, data_size = pOutPackage->GetLength();  
     int n = data_size;
     int fd = m_pEchoTask->GetFd();
 
     while (n > 0) 
     {  
         nwrite = write(fd, buf + data_size - n, n);  
-        if (nwrite < n) 
+        if (nwrite == -1) 
         {  
-            if (nwrite == -1 && errno != EAGAIN) 
+            if (errno != EAGAIN) 
             {  
                 LOG_ERROR("write error");
                 break;  
+            }
+            else
+            {
+                LOG_ERROR("need write again");
+                break;
             }    
         }  
         n -= nwrite;  
     }
-
-    SetEpollDel(fd);
-    close(fd);
-
-    if(m_pEchoTask != NULL) 
-    {
-        delete m_pEchoTask;
-        m_pEchoTask = NULL;
-    }
+    SetEpollIn(fd);
+    //close(fd);
 }
 
 void CWriteTask::CallBack()

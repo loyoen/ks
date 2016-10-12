@@ -9,6 +9,7 @@
 #include "KSEpollHandler.h"
 #include "../memory/CKMemMgr.h"
 #include "../tasks/CKReqTaskMgr.h"
+#include "../tasks/CKIOTaskMgr.h"
 #include "../log/KSLog.h"
 #include <iostream>
 
@@ -80,11 +81,14 @@ void CEpollHandler::DoAccept()
 
 void CEpollHandler::DoRead(int fd)
 {
-    std::cout << "read from fd= " << fd << std::endl;    
+    
+    //std::cout << "read from fd= " << fd << std::endl;    
+    /*
     CReadTask* pTask = new CReadTask(m_iEpollFd,fd);
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
-    /*
+    */
+
     int nindex = 0, nread = 0, nleft = 0;
     
     CMemMgr* pMemMgr = CMemMgr::GetMemMgr(); 
@@ -124,7 +128,7 @@ void CEpollHandler::DoRead(int fd)
 
         if (nread == -1 && errno != EAGAIN) 
         {
-            LOG_ERROR("read error");
+            LOG_ERROR("read error %d", errno);
             if(pTask != NULL)
                 delete pTask;
             pPackage->Release();
@@ -148,18 +152,19 @@ void CEpollHandler::DoRead(int fd)
     
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
-    */
 }
 
 void CEpollHandler::DoWrite(void* data)
 {        
-    /*
+    /*    
     CEchoTask* pEchoTask = (CEchoTask*)data;
-    CWriteTask* pTask = new CWriteTask(pEchoTask,m_iEpollFd, pEchoTask->GetFd());
+    if(pEchoTask->GetOutPackage() == NULL)
+        std::cout << "write no package" << std::endl;
+    CWriteTask* pTask = new CWriteTask(pEchoTask, m_iEpollFd, pEchoTask->GetFd());
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
     */
-    
+     
     CEchoTask* pEchoTask = (CEchoTask*)data;
     char* buf = pEchoTask->GetOutPackage()->GetData();
     int nwrite = 0, data_size = pEchoTask->GetOutPackage()->GetLength();  

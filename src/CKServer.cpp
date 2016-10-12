@@ -88,6 +88,9 @@ void CKServer::Run()
     // epoll
     CThreadHandler* pHandler = new CEpollHandler(m_pConfig);
     CThread* pThread = new CThread(pHandler);
+    //CThreadHandler* pHandler2= new CEpollHandler(m_pConfig);
+    //CThread* pThread2= new CThread(pHandler2);
+    
     pThread->Wait();
 }
 

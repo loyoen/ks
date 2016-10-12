@@ -14,7 +14,7 @@ int test_call_back(void* input, void* output)
 {
     CPackage* pIn = (CPackage*)input;
     CPackage* pOut = (CPackage*)output;
-    std::cout << pIn->GetData() << std::endl;
+    //std::cout << pIn->GetData() << std::endl;
     //LOG_INFO("READ IN LENGTH = %d", pIn->GetLength());
     int iLen = sprintf(pOut->GetData(), 
             "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);

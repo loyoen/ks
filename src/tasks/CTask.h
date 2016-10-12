@@ -40,7 +40,7 @@ public:
     int GetFd(){return m_iFd;}
     CPackage* GetOutPackage(){return m_OutPackage;}
 
-private:
+public:
     std::vector<CPackage*>  m_Packages;
     CPackage*               m_OutPackage; 
 };
