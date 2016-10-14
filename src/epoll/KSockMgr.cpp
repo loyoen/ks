@@ -63,6 +63,10 @@ int CSock::DoReadHead()
     {
         return iTotalRead;
     }
+    else if(-1 == nread && 0 == iTotalRead)
+    {
+        return 0;
+    }
 #ifdef HTTP
     char* szData = (char*)m_pHeadPack->GetData();
     std::cout << szData << std::endl;
@@ -114,6 +118,7 @@ int CSock::DoReadBody()
 {
     int iTotalRead = 0;
     int nread = 0, nleft = m_iContentLen - m_iIndexPos;
+    std::cout << "start read body left = " << nleft << std::endl; 
     while((nread = read(m_iFd, (char*)m_pBodyPack->GetData() + m_iIndexPos, nleft)) > 0)
     {
         m_iIndexPos += nread;
@@ -124,10 +129,11 @@ int CSock::DoReadBody()
             break;
         }
     }
-    if(0 == nread)
+    if(0 == nread && nleft != 0)
     {
         return iTotalRead;
     }
+    std::cout << (char*)m_pBodyPack->GetData() << std::endl;
     CPackage* pPackage = new CPackage(m_pHeadPack, m_pBodyPack);
     CEchoTask* pTask = new CEchoTask(CSockMgr::GetSockMgr()->GetEpollFd(), m_iFd, pPackage);
     CReqTaskMgr::GetReqTaskMgr()->AddTask(pTask);

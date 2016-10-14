@@ -164,6 +164,7 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
     pthread_mutex_lock(&m_MutexChain);
     
     CBodyPack* pBodyPack = m_pBodyChain;
+    CBodyPack* pResBlock = NULL;
     while(pBodyPack != NULL)
     {
         if(pBodyPack->IsFree() && pBodyPack->GetLength()>length)
@@ -173,20 +174,20 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
                     pBodyPack, pBodyPack->GetNextBlock());
             pBodyPack->SetNextBlock(pNewBodyPack);
             pBodyPack->SetFree(false);
-            pthread_mutex_unlock(&m_MutexChain);
-            return pBodyPack;
+            pResBlock = pBodyPack;
+            break;
         } 
         else if(pBodyPack->IsFree() && pBodyPack->GetLength()==length)
         {
             pBodyPack->SetFree(false);
-            pthread_mutex_unlock(&m_MutexChain);
-            return pBodyPack;
+            pResBlock = pBodyPack;
+            break;
         }
         pBodyPack = pBodyPack->GetNextBlock();
     }
-
     pthread_mutex_unlock(&m_MutexChain);
-    return NULL;
+    std::cout << "pull mem end" << std::endl;
+    return pResBlock;
 }
 
 
