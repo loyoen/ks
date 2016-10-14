@@ -12,7 +12,7 @@
 namespace ks
 {
 
-CIOTaskMgr* CIOTaskMgr::m_pTaskMgrInstance = NULL;
+INITIALIZE(IOTaskMgr)
 
 CIOTaskMgr::CIOTaskMgr()
 {

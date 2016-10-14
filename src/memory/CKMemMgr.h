@@ -55,19 +55,9 @@ private:
 
 class CMemMgr
 {
-private:
-    static CMemMgr* m_pMemMgrInstance;
-    CMemMgr();
+    SINGLETON(MemMgr)
 
-public:
-    static CMemMgr* GetMemMgr()
-    {
-        if(NULL == m_pMemMgrInstance)
-            m_pMemMgrInstance = new CMemMgr();
-        return m_pMemMgrInstance;
-    }
-    ~CMemMgr();
-    
+public: 
     void Init(CConfig* pConfig);
     CMemHeadMgr*    GetMemHeadMgr(){return m_pMemHeadMgr;}
     CMemBodyMgr*    GetMemBodyMgr(){return m_pMemBodyMgr;}

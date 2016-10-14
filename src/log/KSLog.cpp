@@ -95,7 +95,7 @@ void CLogger::LogPrint(LogLevel level, const char* fmt, ...)
     va_end(arg_ptr);
 
     CIOTask* pTask = new CLogTask(sLogLine);
-    CIOTaskMgr::GetTaskMgr()->AddTask(pTask);
+    CIOTaskMgr::GetIOTaskMgr()->AddTask(pTask);
 }
 
 void CLogger::Trace(void* data, int iLen)

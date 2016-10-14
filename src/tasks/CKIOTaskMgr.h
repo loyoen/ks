@@ -14,26 +14,19 @@
 
 #include "CKTaskMgr.h"
 #include "../thread/Thread.h"
+#include "../include/define.h"
 
 namespace ks
 {
 
 class CIOTaskMgr : public CTaskMgr
 {
+    SINGLETON(IOTaskMgr)
+
 private:
-    static CIOTaskMgr* m_pTaskMgrInstance;
-    CIOTaskMgr();
     CThread* m_pThread;
 
 public:
-    static CIOTaskMgr* GetTaskMgr()
-    {
-        if(NULL == m_pTaskMgrInstance)
-            m_pTaskMgrInstance = new CIOTaskMgr();
-        return m_pTaskMgrInstance;
-    }
-
-    ~CIOTaskMgr();
     void Init();
 };
 

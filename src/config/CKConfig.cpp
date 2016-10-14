@@ -13,7 +13,7 @@
 namespace ks
 {
 
-CConfig* CConfig::m_pConfigInstance = NULL;
+INITIALIZE(Config)
 
 CConfig::CConfig()
 {

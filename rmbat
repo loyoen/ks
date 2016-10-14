@@ -1,2 +1,3 @@
 find . -name "*~" -type f -print -exec rm -rf {} \;
 find . -name "*.log" -type f -print -exec rm -rf {} \;
+find . -name "core.*" -type f -print -exec rm -rf {} \;

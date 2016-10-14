@@ -190,7 +190,7 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
 }
 
 
-CMemMgr* CMemMgr::m_pMemMgrInstance = NULL;
+INITIALIZE(MemMgr)
 
 CMemMgr::CMemMgr()
 {

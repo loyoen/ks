@@ -12,6 +12,7 @@
 #ifndef  __CKCONFIG_H_
 #define  __CKCONFIG_H_
 
+#include "../include/define.h"
 #include <map>
 #include <string>
 #include <fstream>
@@ -24,19 +25,9 @@ typedef unsigned int size_t;
 
 class CConfig
 {
-public:
-    CConfig();
-    ~CConfig();
-    
-    static CConfig* GetConfig()
-    {
-        if(m_pConfigInstance == NULL)
-        {
-            m_pConfigInstance = new CConfig();
-        }
-        return m_pConfigInstance;
-    }
+    SINGLETON(Config)
 
+public:
     void Init();
 
     size_t GetThreadNum();
@@ -55,8 +46,6 @@ private:
     bool ReadConfig(const std::string& filename); 
 
     std::map<std::string, std::string> m_Dict;
-
-    static CConfig* m_pConfigInstance;
 };
 
 }

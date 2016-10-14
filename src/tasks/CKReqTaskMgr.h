@@ -13,28 +13,17 @@
 #define  __CKREQTASKMGR_H_
 
 #include "CKTaskMgr.h"
+#include "../include/define.h"
 
 namespace ks
 {
 
-typedef void* (*PtrFuncTwo)(void*, void*);
-typedef void* (*PtrFunc)(void*);
 
 class CReqTaskMgr : public CTaskMgr
 {
-private:
-    CReqTaskMgr();
-    static CReqTaskMgr* m_pTaskMgrInstance;
+    SINGLETON(ReqTaskMgr)
 
 public:
-    static CReqTaskMgr* GetTaskMgr()
-    {
-        if(NULL == m_pTaskMgrInstance)
-            m_pTaskMgrInstance = new CReqTaskMgr();
-        return m_pTaskMgrInstance;
-    }
-
-    ~CReqTaskMgr();
     void Init();
     void SetUserCallBackFunc(PtrFunc func);
     PtrFunc GetUserCallBackFunc();

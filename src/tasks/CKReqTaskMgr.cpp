@@ -11,7 +11,7 @@
 namespace ks
 {
 
-CReqTaskMgr* CReqTaskMgr::m_pTaskMgrInstance = NULL;
+INITIALIZE(ReqTaskMgr)
 
 CReqTaskMgr::CReqTaskMgr()
 {

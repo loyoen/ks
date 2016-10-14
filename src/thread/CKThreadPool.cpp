@@ -13,7 +13,7 @@
 namespace ks
 {
 
-CThreadMgr* CThreadMgr::m_pThreadMgrInstance = NULL;
+INITIALIZE(ThreadMgr)
 
 CThreadMgr::CThreadMgr()
 {
@@ -38,7 +38,7 @@ void CThreadMgr::Init(CConfig* pConfig)
 
 bool CThreadMgr::ActivateThreadPool()
 {
-    CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
+    CTaskMgr* pTaskMgr = CReqTaskMgr::GetReqTaskMgr();
 
     for(int index=0; index<m_iThreadNum; index++)
     { 

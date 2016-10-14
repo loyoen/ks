@@ -55,7 +55,7 @@ CMemBlock* CEchoTask::GetOutBlock()
 void CEchoTask::Run()
 {
     std::cout << "run echotast" << std::endl;
-    void* pOutBlock = (*CReqTaskMgr::GetTaskMgr()->GetUserCallBackFunc())((void*)m_pPackage);
+    void* pOutBlock = (*CReqTaskMgr::GetReqTaskMgr()->GetUserCallBackFunc())((void*)m_pPackage);
     SetOutBlock((CMemBlock*)pOutBlock);
 }
 

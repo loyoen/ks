@@ -68,8 +68,8 @@ void CKServer::Init()
     m_pConfig = CConfig::GetConfig();
     m_pMemMgr = CMemMgr::GetMemMgr();
     m_pThreadMgr = CThreadMgr::GetThreadMgr();
-    m_pReqTaskMgr = CReqTaskMgr::GetTaskMgr();
-    m_pIOTaskMgr = CIOTaskMgr::GetTaskMgr();
+    m_pReqTaskMgr = CReqTaskMgr::GetReqTaskMgr();
+    m_pIOTaskMgr = CIOTaskMgr::GetIOTaskMgr();
     m_pLogger = CLogger::GetLogger();
 
 
@@ -98,7 +98,7 @@ void CKServer::SetUserCallBackFunc(PtrFunc func)
 {
     if(m_pReqTaskMgr == NULL)
     {
-        m_pReqTaskMgr = CReqTaskMgr::GetTaskMgr();
+        m_pReqTaskMgr = CReqTaskMgr::GetReqTaskMgr();
     }
     m_pReqTaskMgr->SetUserCallBackFunc(func);
 }

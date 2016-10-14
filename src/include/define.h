@@ -29,6 +29,9 @@ namespace ks
 
 #define INITIALIZE(_class) C##_class* C##_class::m_p##_class##Instance = NULL;
 
+typedef void* (*PtrFuncTwo)(void*, void*);
+typedef void* (*PtrFunc)(void*);
+
 
 
 

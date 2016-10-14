@@ -101,7 +101,7 @@ int CSock::DoReadHead()
     
     CPackage* pPackage = new CPackage(m_pHeadPack, m_pBodyPack);
     CEchoTask* pTask = new CEchoTask(CSockMgr::GetSockMgr()->GetEpollFd(), m_iFd, pPackage);
-    CReqTaskMgr::GetTaskMgr()->AddTask(pTask);
+    CReqTaskMgr::GetReqTaskMgr()->AddTask(pTask);
 
 
     return iTotalRead;
@@ -130,7 +130,7 @@ int CSock::DoReadBody()
     }
     CPackage* pPackage = new CPackage(m_pHeadPack, m_pBodyPack);
     CEchoTask* pTask = new CEchoTask(CSockMgr::GetSockMgr()->GetEpollFd(), m_iFd, pPackage);
-    CReqTaskMgr::GetTaskMgr()->AddTask(pTask);
+    CReqTaskMgr::GetReqTaskMgr()->AddTask(pTask);
 
 
     m_ReadStats = READ_HEAD;

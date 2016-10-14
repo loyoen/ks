@@ -15,23 +15,16 @@
 #include "../config/CKConfig.h"
 #include "Thread.h"
 #include <vector>
+
 namespace ks
 {
 
 class CThreadMgr
 {
-private:
-    CThreadMgr();
-    static CThreadMgr* m_pThreadMgrInstance;
+    SINGLETON(ThreadMgr)
+
 
 public:
-    static CThreadMgr* GetThreadMgr()
-    {
-        if(NULL == m_pThreadMgrInstance)
-            m_pThreadMgrInstance = new CThreadMgr();
-        return m_pThreadMgrInstance;
-    }
-    ~CThreadMgr();
 
     void Init(CConfig* pConfig);
     bool ActivateThreadPool();
