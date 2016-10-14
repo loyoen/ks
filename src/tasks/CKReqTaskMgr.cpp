@@ -26,12 +26,12 @@ void CReqTaskMgr::Init()
     CTaskMgr::Init();
 }
 
-void CReqTaskMgr::SetUserCallBackFunc(PtrFuncTwo func)
+void CReqTaskMgr::SetUserCallBackFunc(PtrFunc func)
 {
     m_UserCallBackFunc = func;
 }
 
-PtrFuncTwo CReqTaskMgr::GetUserCallBackFunc()
+PtrFunc CReqTaskMgr::GetUserCallBackFunc()
 {
     return m_UserCallBackFunc;
 }

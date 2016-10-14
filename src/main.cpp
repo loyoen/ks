@@ -10,16 +10,20 @@
 
 using namespace ks;
 
-int test_call_back(void* input, void* output)
+void* test_call_back(void* input)
 {
+    std::cout << "in callback" << std::endl;
     CPackage* pIn = (CPackage*)input;
-    CPackage* pOut = (CPackage*)output;
+    std::cout << "before get out memory" << std::endl;
+    CMemBlock* pOutBlock = CMemMgr::GetMemMgr()->GetMemBodyMgr()->Pull(128);
     //std::cout << pIn->GetData() << std::endl;
     //LOG_INFO("READ IN LENGTH = %d", pIn->GetLength());
-    int iLen = sprintf(pOut->GetData(), 
+    std::cout << "after get out memory" << std::endl;
+    int iLen = sprintf((char*)pOutBlock->GetData(), 
             "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);
-    pOut->SetLength(iLen);
-    return 0;
+    std::cout << "return len" << iLen << std::endl;
+    pOutBlock->SetUsedSize(iLen);
+    return pOutBlock;
 }
 
 int main()

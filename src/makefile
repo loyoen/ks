@@ -1,7 +1,7 @@
 default : all
 all : ks
-ks : main.o CKServer.o CKConfig.o CKMemMgr.o CKPackage.o CKThreadPool.o Thread.o CKReqTaskMgr.o CKIOTaskMgr.o CKTaskMgr.o CTask.o TaskHandler.o KSEpollHandler.o KSEpollCtlBase.o KSLog.o
-	g++ -o ks -fstack-protector -fstack-protector-all -g main.o CKServer.o CKConfig.o CKMemMgr.o CKPackage.o CKThreadPool.o Thread.o CKReqTaskMgr.o CKIOTaskMgr.o CKTaskMgr.o CTask.o TaskHandler.o KSEpollHandler.o KSEpollCtlBase.o KSLog.o -lpthread
+ks : main.o CKServer.o CKConfig.o CKMemMgr.o CKPackage.o CKThreadPool.o Thread.o CKReqTaskMgr.o CKIOTaskMgr.o CKTaskMgr.o CTask.o TaskHandler.o KSEpollHandler.o KSEpollCtlBase.o KSockMgr.o KSLog.o
+	g++ -o ks -fstack-protector -fstack-protector-all -g main.o CKServer.o CKConfig.o CKMemMgr.o CKPackage.o CKThreadPool.o Thread.o CKReqTaskMgr.o CKIOTaskMgr.o CKTaskMgr.o CTask.o TaskHandler.o KSEpollHandler.o KSEpollCtlBase.o KSockMgr.o KSLog.o -lpthread
 main.o : main.cpp CKServer.h
 	g++ -c main.cpp
 CKServer.o : CKServer.cpp CKServer.h ./config/CKConfig.h ./memory/CKMemMgr.h ./thread/CKThreadPool.h ./tasks/CKTaskMgr.h
@@ -26,10 +26,12 @@ CTask.o : ./tasks/CTask.cpp ./tasks/CTask.h ./memory/CKPackage.h
 	g++ -c ./tasks/CTask.cpp
 TaskHandler.o : ./tasks/TaskHandler.cpp ./tasks/TaskHandler.h ./tasks/CKTaskMgr.h
 	g++ -c ./tasks/TaskHandler.cpp
-KSEpollHandler.o : ./epoll/KSEpollHandler.cpp ./epoll/KSEpollHandler.h ./config/CKConfig.h ./thread/Thread.h ./epoll/KSEpollCtlBase.h
+KSEpollHandler.o : ./epoll/KSEpollHandler.cpp ./epoll/KSEpollHandler.h ./epoll/KSockMgr.h ./config/CKConfig.h ./thread/Thread.h ./epoll/KSEpollCtlBase.h
 	g++ -c ./epoll/KSEpollHandler.cpp
 KSEpollCtlBase.o : ./epoll/KSEpollCtlBase.cpp ./epoll/KSEpollCtlBase.h
 	g++ -c ./epoll/KSEpollCtlBase.cpp
+KSockMgr.o : ./epoll/KSockMgr.cpp ./epoll/KSockMgr.h ./tasks/CKReqTaskMgr.h
+	g++ -c ./epoll/KSockMgr.cpp
 KSLog.o : ./log/KSLog.cpp ./log/KSLog.h ./tasks/CKIOTaskMgr.h
 	g++ -c ./log/KSLog.cpp
 

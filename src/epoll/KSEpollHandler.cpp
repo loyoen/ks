@@ -24,9 +24,15 @@ CEpollHandler::CEpollHandler(CConfig* pConfig)
         m_iMaxEvents = pConfig->GetIntValue("MaxEvents");
         m_iPort = pConfig->GetIntValue("port");
     }
+    m_pSockMgr = CSockMgr::GetSockMgr();
 }
 CEpollHandler::~CEpollHandler()
 {
+    if(m_pSockMgr != NULL)
+    {
+        delete m_pSockMgr;
+        m_pSockMgr = NULL;
+    }
 }
 
 int CEpollHandler::OnThreadProc()
@@ -70,7 +76,8 @@ void CEpollHandler::DoAccept()
         {  
             LOG_FATAL("epoll_ctl: add");  
             exit(EXIT_FAILURE);  
-        } 
+        }
+        m_pSockMgr->AddSock(m_iCurConnSock); 
     }  
     if (m_iCurConnSock == -1) 
     {  
@@ -82,76 +89,15 @@ void CEpollHandler::DoAccept()
 void CEpollHandler::DoRead(int fd)
 {
     
-    //std::cout << "read from fd= " << fd << std::endl;    
     /*
     CReadTask* pTask = new CReadTask(m_iEpollFd,fd);
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
     */
+    std::cout << "read from fd" << fd << std::endl;
+    m_pSockMgr->Read(fd);
 
-    int nindex = 0, nread = 0, nleft = 0;
     
-    CMemMgr* pMemMgr = CMemMgr::GetMemMgr(); 
-    CPackage* pPackage = NULL;
-    char* readbuf = NULL;
-    CEchoTask* pTask = NULL;
-    
-    do
-    {
-        nindex = 0;
-        nread = 0;
-        pPackage = pMemMgr->Pull();
-        if(NULL == pPackage)
-            return;
-        
-        readbuf = (char*)pPackage->GetData();
-        nleft = pPackage->GetInitLength();
-        while ((nread = read(fd, readbuf + nindex, nleft)) > 0) 
-        {  
-            nindex += nread;
-            nleft -= nread;
-            if(0 == nleft)
-                break;
-        }
-
-        if(nread == 0)
-        {
-            //LOG_INFO("close fd");
-            SetEpollDel(fd);
-            close(fd);
-            
-            if(pTask != NULL)
-                delete pTask;
-            pPackage->Release();
-            return;
-        }
-
-        if (nread == -1 && errno != EAGAIN) 
-        {
-            LOG_ERROR("read error %d", errno);
-            if(pTask != NULL)
-                delete pTask;
-            pPackage->Release();
-            return;
-        }
-
-        pPackage->SetLength(nindex);
-        
-        if(NULL == pTask)
-        {
-            pTask = new CEchoTask(m_iEpollFd, fd);
-        }
-        pTask->AddPackage(pPackage);
-
-        if(errno == EAGAIN)
-        {
-            break;
-        }
-
-    }while(true);
-    
-    CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
-    pTaskMgr->AddTask(pTask);
 }
 
 void CEpollHandler::DoWrite(void* data)
@@ -164,12 +110,13 @@ void CEpollHandler::DoWrite(void* data)
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
     */
-     
+    std::cout << "into write" << std::endl; 
     CEchoTask* pEchoTask = (CEchoTask*)data;
-    char* buf = pEchoTask->GetOutPackage()->GetData();
-    int nwrite = 0, data_size = pEchoTask->GetOutPackage()->GetLength();  
+    char* buf = (char*)pEchoTask->GetOutBlock()->GetData();
+    int nwrite = 0, data_size = pEchoTask->GetOutBlock()->GetUsedSize();  
     int n = data_size;
     int fd = pEchoTask->GetFd();
+    std::cout << "outsize" << data_size << "fd = " << fd << std::endl;
     while (n > 0) 
     {  
         nwrite = write(fd, buf + data_size - n, n);  
@@ -183,9 +130,10 @@ void CEpollHandler::DoWrite(void* data)
         }
         n -= nwrite;
     }
-    SetEpollDel(fd);
-    close(fd); 
+    std::cout << "write end" << std::endl;
+    SetEpollIn(fd);
     delete pEchoTask;
+    std::cout << "delete suc" << std::endl;
 }
 
 int CEpollHandler::StartEpoll()
@@ -194,7 +142,7 @@ int CEpollHandler::StartEpoll()
 
     struct epoll_event *events = (struct epoll_event*)malloc(sizeof(struct epoll_event)*m_iMaxEvents);
     int fdIndex = 0, fd;
-
+    std::cout << "start epoll" << std::endl;
     while(true)
     {  
         m_iNfds = DoWait(events);
@@ -249,7 +197,10 @@ void CEpollHandler::InitEnv()
     listen(m_iFd, 20);
 
     
-    m_iEpollFd = epoll_create(m_iMaxEvents);  
+    m_iEpollFd = epoll_create(m_iMaxEvents);
+  
+    m_pSockMgr->Init(m_iEpollFd);
+
     if (m_iEpollFd == -1) 
     {  
         LOG_FATAL("epoll_create");  

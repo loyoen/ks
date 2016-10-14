@@ -12,15 +12,21 @@
 namespace ks
 {
 
-CPackage::CPackage(size_t length)
+CMemBlock::CMemBlock(size_t length)
+ : m_iLength(length), m_iUsedSize(0)
+ , m_pData(NULL), m_bIsFree(true)
 {
-    m_iInitLength = length;
-    m_iLength = 0;
-    m_bIsFree = true;
-    m_pData = NULL;
 }
 
-CPackage::~CPackage()
+CMemBlock::~CMemBlock()
+{
+}
+
+CHeadPack::CHeadPack(size_t length)
+ : CMemBlock(length)
+{
+}
+CHeadPack::~CHeadPack()
 {
     if(m_pData != NULL)
     {
@@ -29,48 +35,53 @@ CPackage::~CPackage()
     }
 }
 
-void CPackage::Init()
+void CHeadPack::Init()
 {
-    m_pData = (char*)malloc(sizeof(char)*m_iInitLength);
+    m_pData = (void*)malloc(m_iLength);
 }
-
-void CPackage::SetFree(bool bIsFree)
-{
-    m_bIsFree = bIsFree;
-}
-
-void CPackage::SetLength(size_t length)
-{
-    m_iLength = length;
-}
-
-size_t CPackage::GetLength()
-{
-    return m_iLength;
-}
-
-size_t CPackage::GetInitLength()
-{
-    return m_iInitLength;
-}
-
-char* CPackage::GetData()
-{
-    return m_pData;
-}
-
-void CPackage::Release()
+void CHeadPack::Release()
 {
     m_bIsFree = true;
-    m_iLength = 0;
-    CMemMgr* pMemMgr = CMemMgr::GetMemMgr();
-    pMemMgr->Push(this);
+    m_iUsedSize = 0;
+    CMemMgr::GetMemMgr()->GetMemHeadMgr()->Push(this);
 }
 
+CBodyPack::CBodyPack(size_t length)
+ : CMemBlock(length)
+{
+}
+CBodyPack::~CBodyPack()
+{
+}
 
+void CBodyPack::Init(void* pData, CBodyPack* preBlock, CBodyPack* nextBlock)
+{
+    m_pData = pData;
+    m_pPreBlock = preBlock;
+    m_pNextBlock = nextBlock;
+}
 
+void CBodyPack::Release()
+{
+    //todo
+    m_bIsFree = true;
+    m_iUsedSize = 0;
+    CMemMgr* pMemMgr = CMemMgr::GetMemMgr();
+    pMemMgr->GetMemBodyMgr()->Push(this);
+}
 
+CPackage::CPackage(CHeadPack* pHeadPack, CBodyPack* pBodyPack)
+ : m_pHeadPack(pHeadPack), m_pBodyPack(pBodyPack) 
+{
+}
 
+CPackage::~CPackage()
+{
+    if(m_pHeadPack != NULL)
+        m_pHeadPack->Release();
+    if(m_pBodyPack != NULL)
+        m_pBodyPack->Release();
+}
 
 
 }

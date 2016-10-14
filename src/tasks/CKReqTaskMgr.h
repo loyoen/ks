@@ -17,7 +17,8 @@
 namespace ks
 {
 
-typedef int (*PtrFuncTwo)(void*, void*);
+typedef void* (*PtrFuncTwo)(void*, void*);
+typedef void* (*PtrFunc)(void*);
 
 class CReqTaskMgr : public CTaskMgr
 {
@@ -35,11 +36,11 @@ public:
 
     ~CReqTaskMgr();
     void Init();
-    void SetUserCallBackFunc(PtrFuncTwo func);
-    PtrFuncTwo GetUserCallBackFunc();
+    void SetUserCallBackFunc(PtrFunc func);
+    PtrFunc GetUserCallBackFunc();
 
 private:
-    PtrFuncTwo  m_UserCallBackFunc;    
+    PtrFunc  m_UserCallBackFunc;    
 };
 
 }

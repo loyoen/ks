@@ -94,7 +94,7 @@ void CKServer::Run()
     pThread->Wait();
 }
 
-void CKServer::SetUserCallBackFunc(PtrFuncTwo func)
+void CKServer::SetUserCallBackFunc(PtrFunc func)
 {
     if(m_pReqTaskMgr == NULL)
     {

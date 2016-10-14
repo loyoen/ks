@@ -13,12 +13,45 @@
 #define  __CKMEMMGR_H_
 
 #include "../config/CKConfig.h"
+#include "../include/define.h"
 #include "CKPackage.h"
 #include <queue>
 #include <pthread.h>
 
 namespace ks
 {
+
+class CMemHeadMgr
+{
+    SINGLETON(MemHeadMgr)
+
+public:
+    void Init(int PackNum, int PackLength);
+    void Push(CHeadPack* pHeadPack);
+    CHeadPack* Pull();
+
+private:
+    std::queue<CHeadPack*>  m_qHeadPackages;
+    pthread_mutex_t         m_MutexHead;
+    pthread_mutex_t         m_MutexTail;
+
+};
+
+class CMemBodyMgr
+{
+    SINGLETON(MemBodyMgr)
+
+public:
+    void Init(size_t length);
+    void Push(CBodyPack* pBodyPack);
+    CBodyPack* Pull(size_t length);
+
+private:
+    void*                   m_pStartMemPos;
+    CBodyPack*              m_pBodyChain;
+    std::vector<CBodyPack*> m_vFreeBlocks;
+    pthread_mutex_t         m_MutexChain;
+};
 
 class CMemMgr
 {
@@ -36,13 +69,12 @@ public:
     ~CMemMgr();
     
     void Init(CConfig* pConfig);
-    void Push(CPackage* pPackage);
-    CPackage* Pull();
+    CMemHeadMgr*    GetMemHeadMgr(){return m_pMemHeadMgr;}
+    CMemBodyMgr*    GetMemBodyMgr(){return m_pMemBodyMgr;}
 
 private:
-    std::queue<CPackage*>   m_cQueuePackage;    //head and tail lock
-    pthread_mutex_t         m_MutexHead;
-    pthread_mutex_t         m_MutexTail;
+    CMemHeadMgr*    m_pMemHeadMgr;
+    CMemBodyMgr*    m_pMemBodyMgr;
 };
 
 }

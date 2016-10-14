@@ -29,27 +29,29 @@ public:
 class CEchoTask : public CTask, public CEpollCtlBase
 {
 public:
-    CEchoTask(int epfd, int fd);
+    CEchoTask(int epfd, int fd, CPackage* pPackage);
     ~CEchoTask();
 
     virtual void Run();
     virtual void CallBack();
 
-    virtual void AddPackage(CPackage* pPackage);
+    void SetPackage(CPackage* pPackage);
+    CPackage* GetPackage();
+    void SetOutBlock(CMemBlock* pBlock);
+    CMemBlock* GetOutBlock();
 
     int GetFd(){return m_iFd;}
-    CPackage* GetOutPackage(){return m_OutPackage;}
 
-public:
-    std::vector<CPackage*>  m_Packages;
-    CPackage*               m_OutPackage; 
+private:
+    CPackage*   m_pPackage;
+    CMemBlock*  m_pOutBlock;
 };
 
 class CIOTask : public CTask
 {
 public:
     CIOTask();
-    ~CIOTask();
+    virtual ~CIOTask();
 
     virtual void Run(){};
     virtual void CallBack(){};

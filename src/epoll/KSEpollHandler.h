@@ -14,6 +14,7 @@
 
 #include "../thread/Thread.h"
 #include "../config/CKConfig.h"
+#include "KSockMgr.h"
 #include "KSEpollCtlBase.h"
 #include <sys/socket.h>  
 #include <sys/wait.h>  
@@ -60,6 +61,8 @@ private:
 
     sockaddr_in  m_remote;
     int     m_addrlen;
+
+    CSockMgr* m_pSockMgr;
 };
 
 

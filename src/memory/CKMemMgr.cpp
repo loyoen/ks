@@ -13,60 +13,57 @@
 namespace ks
 {
 
-CMemMgr* CMemMgr::m_pMemMgrInstance = NULL;
+INITIALIZE(MemHeadMgr)
 
-CMemMgr::CMemMgr()
+CMemHeadMgr::CMemHeadMgr()
 {
     pthread_mutex_init(&m_MutexHead, NULL);
     pthread_mutex_init(&m_MutexTail, NULL);
 }
-CMemMgr::~CMemMgr()
+CMemHeadMgr::~CMemHeadMgr()
 {
-    while(!m_cQueuePackage.empty())
+    while(!m_qHeadPackages.empty())
     {
-        CPackage* pPackage = m_cQueuePackage.front();
-        m_cQueuePackage.pop();
-        delete pPackage;
+        CHeadPack* pPack = m_qHeadPackages.front();
+        m_qHeadPackages.pop();
+        delete pPack;
     }
     pthread_mutex_destroy(&m_MutexHead);
     pthread_mutex_destroy(&m_MutexTail);
 }
-
-void CMemMgr::Init(CConfig* pConfig)
+void CMemHeadMgr::Init(int PackNum, int PackLength)
 {
-    size_t iPackageNum = pConfig->GetPackageNum();
-    size_t iPackageSize = pConfig->GetPackageSize();
-    for(size_t i=0; i<iPackageNum; i++)
+    for(size_t i=0; i<PackNum; i++)
     {
-        CPackage* pPackage = new CPackage(iPackageSize);
-        pPackage->Init();
-        Push(pPackage);
+        CHeadPack* pHeadPack = new CHeadPack(PackLength);
+        pHeadPack->Init();
+        Push(pHeadPack);
     }
-}
+} 
 
-void CMemMgr::Push(CPackage* pPackage)
+void CMemHeadMgr::Push(CHeadPack* pPack)
 {
     //lock
     pthread_mutex_lock(&m_MutexTail);
-    m_cQueuePackage.push(pPackage);
+    m_qHeadPackages.push(pPack);
     pthread_mutex_unlock(&m_MutexTail);
 }
     
-CPackage* CMemMgr::Pull()
+CHeadPack* CMemHeadMgr::Pull()
 {
-    if(m_cQueuePackage.empty())
+    if(m_qHeadPackages.empty())
     {
         std::cout << "pull empty" << std::endl;
         return NULL;
     }
 
-    CPackage* pPackage = NULL;
+    CHeadPack* pPackage = NULL;
     
     pthread_mutex_lock(&m_MutexHead);
-    if(!m_cQueuePackage.empty())
+    if(!m_qHeadPackages.empty())
     {
-        pPackage = m_cQueuePackage.front();
-        m_cQueuePackage.pop();
+        pPackage = m_qHeadPackages.front();
+        m_qHeadPackages.pop();
     }
     pthread_mutex_unlock(&m_MutexHead);
     
@@ -77,6 +74,154 @@ CPackage* CMemMgr::Pull()
     }
     return pPackage;
 }
+
+INITIALIZE(MemBodyMgr)
+
+CMemBodyMgr::CMemBodyMgr()
+{
+    m_pBodyChain = NULL;
+    m_pStartMemPos = NULL;
+    pthread_mutex_init(&m_MutexChain, NULL);
+}
+CMemBodyMgr::~CMemBodyMgr()
+{
+    if(m_pStartMemPos != NULL)
+    {
+        free(m_pStartMemPos);
+        m_pStartMemPos = NULL;
+    }
+
+    CBodyPack* pBodyPack = m_pBodyChain;
+    while(pBodyPack != NULL)
+    {
+        CBodyPack* pNextPack = pBodyPack->GetNextBlock();
+        delete pBodyPack;
+        pBodyPack = pNextPack;
+    }
+    m_pBodyChain = NULL;
+    pthread_mutex_destroy(&m_MutexChain);
+}
+
+void CMemBodyMgr::Init(size_t length)
+{
+    std::cout << "malloc length " << length << std::endl;
+    m_pStartMemPos = (void*)malloc(length);
+    m_pBodyChain = new CBodyPack(length);
+    m_pBodyChain->Init(m_pStartMemPos, NULL, NULL);
+    m_vFreeBlocks.push_back(m_pBodyChain);
+}
+void CMemBodyMgr::Push(CBodyPack* pBodyPack)
+{
+    //todo
+    std::cout << "push mem start" << std::endl;
+    pthread_mutex_lock(&m_MutexChain);
+
+    if(pBodyPack == NULL)
+        return;
+
+    bool bIsCombine = false;
+    CBodyPack* pCurBlock = pBodyPack;
+    CBodyPack* pPreBlock = pBodyPack->GetPreBlock();
+    CBodyPack* pNextBlock = pBodyPack->GetNextBlock();
+    if(pPreBlock != NULL && pPreBlock->IsFree())
+    {
+        bIsCombine = true;
+        pPreBlock->SetLength(pPreBlock->GetLength() + pBodyPack->GetLength());
+        pPreBlock->SetNextBlock(pNextBlock);
+        if(pNextBlock != NULL)
+        {
+            pNextBlock->SetPreBlock(pPreBlock);
+        }
+        pCurBlock = pPreBlock;
+        delete pBodyPack;
+        pBodyPack = NULL;
+    }
+    if(pNextBlock != NULL && pNextBlock->IsFree())
+    {
+        bIsCombine = true;
+        pCurBlock->SetLength(pCurBlock->GetLength() + pNextBlock->GetLength());
+        pCurBlock->SetNextBlock(pNextBlock->GetNextBlock());
+        if(pNextBlock->GetNextBlock() != NULL)
+        {
+            pNextBlock->GetNextBlock()->SetPreBlock(pCurBlock);
+        }
+        delete pNextBlock;
+        pNextBlock = NULL;
+    }
+    if(!bIsCombine)
+    {
+        pBodyPack->SetFree(true);
+    }
+
+    pthread_mutex_unlock(&m_MutexChain);
+    std::cout << "push mem end" << std::endl;
+}
+
+CBodyPack* CMemBodyMgr::Pull(size_t length)
+{ 
+    //todo
+    std::cout << "pull mem start" << std::endl;
+    pthread_mutex_lock(&m_MutexChain);
+    
+    CBodyPack* pBodyPack = m_pBodyChain;
+    while(pBodyPack != NULL)
+    {
+        if(pBodyPack->IsFree() && pBodyPack->GetLength()>length)
+        {
+            CBodyPack* pNewBodyPack = new CBodyPack(pBodyPack->GetLength()-length);
+            pNewBodyPack->Init(((char*)pBodyPack->GetData()) + (pBodyPack->GetLength()-length), 
+                    pBodyPack, pBodyPack->GetNextBlock());
+            pBodyPack->SetNextBlock(pNewBodyPack);
+            pBodyPack->SetFree(false);
+            pthread_mutex_unlock(&m_MutexChain);
+            return pBodyPack;
+        } 
+        else if(pBodyPack->IsFree() && pBodyPack->GetLength()==length)
+        {
+            pBodyPack->SetFree(false);
+            pthread_mutex_unlock(&m_MutexChain);
+            return pBodyPack;
+        }
+        pBodyPack = pBodyPack->GetNextBlock();
+    }
+
+    pthread_mutex_unlock(&m_MutexChain);
+    return NULL;
+}
+
+
+CMemMgr* CMemMgr::m_pMemMgrInstance = NULL;
+
+CMemMgr::CMemMgr()
+{
+    m_pMemHeadMgr = NULL;
+    m_pMemBodyMgr = NULL;
+}
+CMemMgr::~CMemMgr()
+{
+    if(m_pMemHeadMgr != NULL)
+    {
+        delete m_pMemHeadMgr;
+        m_pMemHeadMgr = NULL;
+    }
+    if(m_pMemBodyMgr != NULL)
+    {
+        delete m_pMemBodyMgr;
+        m_pMemBodyMgr = NULL;
+    }
+}
+
+void CMemMgr::Init(CConfig* pConfig)
+{
+    size_t iHeadPackNum = pConfig->GetIntValue("HeadPackNum");
+    size_t iHeadPackLength = pConfig->GetIntValue("HeadPackLength");
+    size_t iBodySize = pConfig->GetIntValue("BodySize");
+    m_pMemHeadMgr = CMemHeadMgr::GetMemHeadMgr();
+    m_pMemHeadMgr->Init(iHeadPackNum, iHeadPackLength);
+    m_pMemBodyMgr = CMemBodyMgr::GetMemBodyMgr();
+    m_pMemBodyMgr->Init(iBodySize);
+}
+
 
 }
 

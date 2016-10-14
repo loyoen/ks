@@ -31,7 +31,7 @@ public:
     
     void Init();
     void Run();
-    void SetUserCallBackFunc(PtrFuncTwo func);
+    void SetUserCallBackFunc(PtrFunc func);
 
 private:
     CConfig*        m_pConfig;

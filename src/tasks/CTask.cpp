@@ -16,54 +16,51 @@
 namespace ks
 {
 
-CEchoTask::CEchoTask(int epfd, int fd)
+CEchoTask::CEchoTask(int epfd, int fd, CPackage* pPackage)
     : CEpollCtlBase(epfd, fd)
 {
-    m_OutPackage = CMemMgr::GetMemMgr()->Pull();
-    if(m_OutPackage == NULL)
-    {
-        std::cout << "no out package" << std::endl;
-    }
+    m_pPackage = pPackage;
+    m_pOutBlock = NULL;
+    std::cout << "new echo task" << std::endl;
 }
+
 CEchoTask::~CEchoTask()
 {
-    for(int i=0; i<m_Packages.size();i++)
+    if(m_pPackage != NULL)
     {
-        m_Packages[i]->Release();
+        delete m_pPackage;
+        m_pPackage = NULL;
     }
-    std::vector<CPackage*>().swap(m_Packages);
-    //m_Packages.clear();
-    
-    if(m_OutPackage != NULL)
+    if(m_pOutBlock!=NULL)
     {
-        m_OutPackage->Release();
-        m_OutPackage = NULL;
+        m_pOutBlock->Release();
+        m_pOutBlock = NULL;
     }
 }
 
-void CEchoTask::AddPackage(CPackage* pPackage)
+void CEchoTask::SetPackage(CPackage* pPackage)
 {
-    if(NULL != pPackage)
-        m_Packages.push_back(pPackage);
+    m_pPackage = pPackage;
+}
+void CEchoTask::SetOutBlock(CMemBlock* pBlock)
+{
+    m_pOutBlock = pBlock;
+}
+
+CMemBlock* CEchoTask::GetOutBlock()
+{
+    return m_pOutBlock;
 }
 
 void CEchoTask::Run()
 {
-    if(NULL == m_OutPackage)
-    {
-        return;
-    }
-    (*CReqTaskMgr::GetTaskMgr()->GetUserCallBackFunc())(m_Packages[0], m_OutPackage);
+    std::cout << "run echotast" << std::endl;
+    void* pOutBlock = (*CReqTaskMgr::GetTaskMgr()->GetUserCallBackFunc())((void*)m_pPackage);
+    SetOutBlock((CMemBlock*)pOutBlock);
 }
 
 void CEchoTask::CallBack()
 {
-    if(m_OutPackage == NULL)
-    {
-        std::cout << "no no no " << std::endl;
-        delete this;
-        return;
-    }
     if (SetEpollOut(m_iFd, this) == -1) 
     {  
         perror("epoll_ctl: mod");  
@@ -109,6 +106,7 @@ CReadTask::~CReadTask()
 
 void CReadTask::Run()
 {
+    /*
     int nindex = 0, nread = 0, nleft = 0;
     
     CMemMgr* pMemMgr = CMemMgr::GetMemMgr(); 
@@ -176,6 +174,7 @@ void CReadTask::Run()
     //std::cout << "read end task" << std::endl;    
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
+    */
 }
 
 void CReadTask::CallBack()
@@ -200,6 +199,7 @@ CWriteTask::~CWriteTask()
 
 void CWriteTask::Run()
 {
+    /*
     if(NULL == m_pEchoTask)
     {
         return;
@@ -250,6 +250,7 @@ void CWriteTask::Run()
     }
     SetEpollIn(fd);
     //close(fd);
+    */
 }
 
 void CWriteTask::CallBack()
