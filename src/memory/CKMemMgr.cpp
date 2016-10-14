@@ -165,12 +165,14 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
     
     CBodyPack* pBodyPack = m_pBodyChain;
     CBodyPack* pResBlock = NULL;
+    int i = 1;
     while(pBodyPack != NULL)
     {
         if(pBodyPack->IsFree() && pBodyPack->GetLength()>length)
         {
             CBodyPack* pNewBodyPack = new CBodyPack(pBodyPack->GetLength()-length);
-            pNewBodyPack->Init(((char*)pBodyPack->GetData()) + (pBodyPack->GetLength()-length), 
+            pBodyPack->SetLength(length);
+            pNewBodyPack->Init(((char*)pBodyPack->GetData()) + pBodyPack->GetLength(), 
                     pBodyPack, pBodyPack->GetNextBlock());
             pBodyPack->SetNextBlock(pNewBodyPack);
             pBodyPack->SetFree(false);
@@ -183,6 +185,10 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
             pResBlock = pBodyPack;
             break;
         }
+        i++;
+        std::cout << i << " blocks at";
+        printf("%x", pBodyPack->GetData());
+        std::cout << "length = " << pBodyPack->GetLength() << std::endl;
         pBodyPack = pBodyPack->GetNextBlock();
     }
     pthread_mutex_unlock(&m_MutexChain);

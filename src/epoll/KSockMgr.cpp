@@ -52,13 +52,11 @@ int CSock::DoReadHead()
         m_iIndexPos += nread;
         iTotalRead += nread;
         nleft -= nread;
-        std::cout << "nleft" << nleft << std::endl;
         if(0 >= nleft)
         {
             break;
         }
     }
-    std::cout << "read head end" << nread << std::endl;
     if(0 == nread)
     {
         return iTotalRead;
@@ -69,17 +67,14 @@ int CSock::DoReadHead()
     }
 #ifdef HTTP
     char* szData = (char*)m_pHeadPack->GetData();
-    std::cout << szData << std::endl;
     char* pHeadEnd = strstr(szData,"\r\n\r\n");
     if(pHeadEnd == NULL)
     {
-        std::cout << "read head again" << std::endl;
         LOG_ERROR("READ HEAD AGAIN");
         return iTotalRead + DoReadHead();
     }
     
     int iHeadUsedSize = pHeadEnd + 4 - (char*)m_pHeadPack->GetData();
-    std::cout << "head use size" << iHeadUsedSize << std::endl;
     
     m_pHeadPack->SetUsedSize(iHeadUsedSize);
     
@@ -92,7 +87,6 @@ int CSock::DoReadHead()
             m_iContentLen = atoi(pContentLen);
         }
     }
-    std::cout << "content length" << m_iContentLen << std::endl;
     if(m_iContentLen > 0)
     {
         m_pBodyPack = CMemMgr::GetMemMgr()->GetMemBodyMgr()->Pull(m_iContentLen);
@@ -118,7 +112,6 @@ int CSock::DoReadBody()
 {
     int iTotalRead = 0;
     int nread = 0, nleft = m_iContentLen - m_iIndexPos;
-    std::cout << "start read body left = " << nleft << std::endl; 
     while((nread = read(m_iFd, (char*)m_pBodyPack->GetData() + m_iIndexPos, nleft)) > 0)
     {
         m_iIndexPos += nread;
@@ -133,7 +126,6 @@ int CSock::DoReadBody()
     {
         return iTotalRead;
     }
-    std::cout << (char*)m_pBodyPack->GetData() << std::endl;
     CPackage* pPackage = new CPackage(m_pHeadPack, m_pBodyPack);
     CEchoTask* pTask = new CEchoTask(CSockMgr::GetSockMgr()->GetEpollFd(), m_iFd, pPackage);
     CReqTaskMgr::GetReqTaskMgr()->AddTask(pTask);
@@ -149,7 +141,6 @@ int CSock::DoReadBody()
 
 int CSock::Read()
 {
-    std::cout << "csock read" << std::endl;
     int nread = 0;
     switch(m_ReadStats)
     {
@@ -206,7 +197,6 @@ void CSockMgr::CloseSock(int fd)
 
 void CSockMgr::AddSock(int fd)
 {
-    std::cout << "add sock fd " << fd << std::endl;
     CSock* pSock = new CSock(fd);
     m_mSocks.insert(std::make_pair<int, CSock*>(fd, pSock));
 }

@@ -28,11 +28,13 @@ CEchoTask::~CEchoTask()
 {
     if(m_pPackage != NULL)
     {
+        std::cout << "free echotask package" << std::endl;
         delete m_pPackage;
         m_pPackage = NULL;
     }
-    if(m_pOutBlock!=NULL)
+    if(m_pOutBlock != NULL)
     {
+        std::cout << "free out block" << std::endl;
         m_pOutBlock->Release();
         m_pOutBlock = NULL;
     }
