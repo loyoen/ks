@@ -53,7 +53,6 @@ CHeadPack* CMemHeadMgr::Pull()
 {
     if(m_qHeadPackages.empty())
     {
-        std::cout << "pull empty" << std::endl;
         return NULL;
     }
 
@@ -69,7 +68,6 @@ CHeadPack* CMemHeadMgr::Pull()
     
     if(NULL == pPackage)
     {
-        std::cout << "pull empty" << std::endl;
         LOG_ERROR("No package left");
     }
     return pPackage;
@@ -112,7 +110,6 @@ void CMemBodyMgr::Init(size_t length)
 void CMemBodyMgr::Push(CBodyPack* pBodyPack)
 {
     //todo
-    std::cout << "push mem start" << std::endl;
     pthread_mutex_lock(&m_MutexChain);
 
     if(pBodyPack == NULL)
@@ -140,6 +137,7 @@ void CMemBodyMgr::Push(CBodyPack* pBodyPack)
         bIsCombine = true;
         pCurBlock->SetLength(pCurBlock->GetLength() + pNextBlock->GetLength());
         pCurBlock->SetNextBlock(pNextBlock->GetNextBlock());
+        pCurBlock->SetFree(true);
         if(pNextBlock->GetNextBlock() != NULL)
         {
             pNextBlock->GetNextBlock()->SetPreBlock(pCurBlock);
@@ -153,13 +151,11 @@ void CMemBodyMgr::Push(CBodyPack* pBodyPack)
     }
 
     pthread_mutex_unlock(&m_MutexChain);
-    std::cout << "push mem end" << std::endl;
 }
 
 CBodyPack* CMemBodyMgr::Pull(size_t length)
 { 
     //todo
-    std::cout << "pull mem start" << std::endl;
     pthread_mutex_lock(&m_MutexChain);
     
     CBodyPack* pBodyPack = m_pBodyChain;
@@ -185,13 +181,9 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
             break;
         }
         i++;
-        std::cout << i << " blocks at";
-        printf("%x", pBodyPack->GetData());
-        std::cout << "length = " << pBodyPack->GetLength() << std::endl;
         pBodyPack = pBodyPack->GetNextBlock();
     }
     pthread_mutex_unlock(&m_MutexChain);
-    std::cout << "pull mem end" << std::endl;
     return pResBlock;
 }
 

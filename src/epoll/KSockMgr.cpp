@@ -71,7 +71,7 @@ int CSock::DoReadHead()
     if(pHeadEnd == NULL)
     {
         LOG_ERROR("READ HEAD AGAIN");
-        return iTotalRead + DoReadHead();
+        return iTotalRead + Read();
     }
     
     int iHeadUsedSize = pHeadEnd + 4 - (char*)m_pHeadPack->GetData();
@@ -144,23 +144,18 @@ int CSock::Read()
     switch(m_ReadStats)
     {
     case READ_HEAD:
-        std::cout << "read head" << std::endl;
         nread = DoReadHead();
         break;
     case READ_BODY:
-        std::cout << "read body" << std::endl;
         nread = DoReadBody();
         break;
     default:
-        std::cout << "read other" << std::endl;
         break;
     }
 
-    std::cout << "nread = " << nread << std::endl;
     if(0 == nread)
     {
-        int i= 1;
-        //CSockMgr::GetSockMgr()->CloseSock(m_iFd);
+        CSockMgr::GetSockMgr()->CloseSock(m_iFd);
     }
     return nread;
 }

@@ -21,20 +21,17 @@ CEchoTask::CEchoTask(int epfd, int fd, CPackage* pPackage)
 {
     m_pPackage = pPackage;
     m_pOutBlock = NULL;
-    std::cout << "new echo task" << std::endl;
 }
 
 CEchoTask::~CEchoTask()
 {
     if(m_pPackage != NULL)
     {
-        std::cout << "free echotask package" << std::endl;
         delete m_pPackage;
         m_pPackage = NULL;
     }
     if(m_pOutBlock != NULL)
     {
-        std::cout << "free out block" << std::endl;
         m_pOutBlock->Release();
         m_pOutBlock = NULL;
     }
@@ -56,7 +53,6 @@ CMemBlock* CEchoTask::GetOutBlock()
 
 void CEchoTask::Run()
 {
-    std::cout << "run echotast" << std::endl;
     void* pOutBlock = (*CReqTaskMgr::GetReqTaskMgr()->GetUserCallBackFunc())((void*)m_pPackage);
     SetOutBlock((CMemBlock*)pOutBlock);
 }
