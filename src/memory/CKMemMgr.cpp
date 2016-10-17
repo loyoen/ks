@@ -104,7 +104,6 @@ CMemBodyMgr::~CMemBodyMgr()
 
 void CMemBodyMgr::Init(size_t length)
 {
-    std::cout << "malloc length " << length << std::endl;
     m_pStartMemPos = (void*)malloc(length);
     m_pBodyChain = new CBodyPack(length);
     m_pBodyChain->Init(m_pStartMemPos, NULL, NULL);

@@ -94,7 +94,6 @@ void CEpollHandler::DoRead(int fd)
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
     */
-    std::cout << "read from fd" << fd << std::endl;
     m_pSockMgr->Read(fd);
 
     
@@ -110,13 +109,11 @@ void CEpollHandler::DoWrite(void* data)
     CTaskMgr* pTaskMgr = CReqTaskMgr::GetTaskMgr();
     pTaskMgr->AddTask(pTask);
     */
-    std::cout << "into write" << std::endl; 
     CEchoTask* pEchoTask = (CEchoTask*)data;
     char* buf = (char*)pEchoTask->GetOutBlock()->GetData();
     int nwrite = 0, data_size = pEchoTask->GetOutBlock()->GetUsedSize();  
     int n = data_size;
     int fd = pEchoTask->GetFd();
-    std::cout << "outsize" << data_size << "fd = " << fd << std::endl;
     while (n > 0) 
     {  
         nwrite = write(fd, buf + data_size - n, n);  
@@ -130,10 +127,8 @@ void CEpollHandler::DoWrite(void* data)
         }
         n -= nwrite;
     }
-    std::cout << "write end" << std::endl;
     SetEpollIn(fd);
     delete pEchoTask;
-    std::cout << "delete suc" << std::endl;
 }
 
 int CEpollHandler::StartEpoll()
@@ -142,7 +137,6 @@ int CEpollHandler::StartEpoll()
 
     struct epoll_event *events = (struct epoll_event*)malloc(sizeof(struct epoll_event)*m_iMaxEvents);
     int fdIndex = 0, fd;
-    std::cout << "start epoll" << std::endl;
     while(true)
     {  
         m_iNfds = DoWait(events);

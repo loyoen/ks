@@ -23,9 +23,8 @@ while True:
     print i
     if response.status != 200:
         print "err"
-    httpClient.close()
-#if httpClient:
-#    httpClient.close()
+    if httpClient:
+        httpClient.close()
 
 
 

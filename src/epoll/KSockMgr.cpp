@@ -93,10 +93,10 @@ int CSock::DoReadHead()
         memcpy(m_pBodyPack->GetData(), pHeadEnd+4, m_iIndexPos-iHeadUsedSize);
         m_iIndexPos = m_iIndexPos - iHeadUsedSize;
         m_ReadStats = READ_BODY;
-        return iTotalRead + DoReadBody();
+        return iTotalRead + Read();
     }
-    m_ReadStats = READ_DONE;
-    
+    m_ReadStats = READ_HEAD;
+    m_iIndexPos = 0; 
     CPackage* pPackage = new CPackage(m_pHeadPack, m_pBodyPack);
     CEchoTask* pTask = new CEchoTask(CSockMgr::GetSockMgr()->GetEpollFd(), m_iFd, pPackage);
     CReqTaskMgr::GetReqTaskMgr()->AddTask(pTask);
@@ -135,8 +135,7 @@ int CSock::DoReadBody()
     m_iIndexPos = 0;
     m_iContentLen = 0;
     //contine read because epoll ET
-    int nNextRead = DoReadHead();
-    return iTotalRead + nNextRead; 
+    return iTotalRead + Read(); 
 }
 
 int CSock::Read()
@@ -145,18 +144,23 @@ int CSock::Read()
     switch(m_ReadStats)
     {
     case READ_HEAD:
+        std::cout << "read head" << std::endl;
         nread = DoReadHead();
         break;
     case READ_BODY:
+        std::cout << "read body" << std::endl;
         nread = DoReadBody();
         break;
-    case READ_DONE:
+    default:
+        std::cout << "read other" << std::endl;
         break;
     }
 
+    std::cout << "nread = " << nread << std::endl;
     if(0 == nread)
     {
-        CSockMgr::GetSockMgr()->CloseSock(m_iFd);
+        int i= 1;
+        //CSockMgr::GetSockMgr()->CloseSock(m_iFd);
     }
     return nread;
 }
