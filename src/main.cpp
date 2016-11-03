@@ -17,6 +17,8 @@ void* test_call_back(void* input)
     int iLen = sprintf((char*)pOutBlock->GetData(), 
             "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\nHello World", 11);
     pOutBlock->SetUsedSize(iLen);
+    if(iLen != 50)
+        std::cout << iLen << std::endl;
     return pOutBlock;
 }
 

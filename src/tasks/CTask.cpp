@@ -32,6 +32,7 @@ CEchoTask::~CEchoTask()
     }
     if(m_pOutBlock != NULL)
     {
+        CBodyPack* pPack = (CBodyPack*)m_pOutBlock;
         m_pOutBlock->Release();
         m_pOutBlock = NULL;
     }
