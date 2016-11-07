@@ -60,13 +60,13 @@ CHeadPack* CMemHeadMgr::Pull()
     
     pthread_mutex_lock(&m_MutexHead);
     
-    //LOG_INFO("%d head size", m_qHeadPackages.size());
     
     if(!m_qHeadPackages.empty())
     {
         pPackage = m_qHeadPackages.front();
         m_qHeadPackages.pop();
     }
+
     pthread_mutex_unlock(&m_MutexHead);
     
     if(NULL == pPackage)
@@ -118,13 +118,13 @@ void CMemBodyMgr::Push(CBodyPack* pBodyPack)
     if(pBodyPack == NULL)
         return;
 
-    bool bIsCombine = false;
+    pBodyPack->SetFree(true);
+    
     CBodyPack* pCurBlock = pBodyPack;
     CBodyPack* pPreBlock = pBodyPack->GetPreBlock();
     CBodyPack* pNextBlock = pBodyPack->GetNextBlock();
     if(pPreBlock != NULL && pPreBlock->IsFree())
     {
-        bIsCombine = true;
         pPreBlock->SetLength(pPreBlock->GetLength() + pBodyPack->GetLength());
         pPreBlock->SetNextBlock(pNextBlock);
         if(pNextBlock != NULL)
@@ -132,11 +132,12 @@ void CMemBodyMgr::Push(CBodyPack* pBodyPack)
             pNextBlock->SetPreBlock(pPreBlock);
         }
         pCurBlock = pPreBlock;
+        pCurBlock->SetFree(true);
         delete pBodyPack;
+        pBodyPack = NULL;
     }
     if(pNextBlock != NULL && pNextBlock->IsFree())
     {
-        bIsCombine = true;
         pCurBlock->SetLength(pCurBlock->GetLength() + pNextBlock->GetLength());
         pCurBlock->SetNextBlock(pNextBlock->GetNextBlock());
         pCurBlock->SetFree(true);
@@ -146,10 +147,6 @@ void CMemBodyMgr::Push(CBodyPack* pBodyPack)
         }
         delete pNextBlock;
         pNextBlock = NULL;
-    }
-    if(!bIsCombine)
-    {
-        pBodyPack->SetFree(true);
     }
 
     pthread_mutex_unlock(&m_MutexChain);
@@ -168,13 +165,13 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
         {
             CBodyPack* pNewBodyPack = new CBodyPack(pBodyPack->GetLength()-length);
             pBodyPack->SetLength(length);
-            pNewBodyPack->Init(((char*)pBodyPack->GetData()) + pBodyPack->GetLength(), 
+            pNewBodyPack->Init((char*)pBodyPack->GetData() + pBodyPack->GetLength(), 
                     pBodyPack, pBodyPack->GetNextBlock());
-            pBodyPack->SetNextBlock(pNewBodyPack);
-            if(pNewBodyPack->GetNextBlock() != NULL)
+            if(pBodyPack->GetNextBlock() != NULL)
             {
-                pNewBodyPack->GetNextBlock()->SetPreBlock(pNewBodyPack);
+                pBodyPack->GetNextBlock()->SetPreBlock(pNewBodyPack);
             }
+            pBodyPack->SetNextBlock(pNewBodyPack);
             pBodyPack->SetFree(false);
             pResBlock = pBodyPack;
             break;
@@ -186,6 +183,10 @@ CBodyPack* CMemBodyMgr::Pull(size_t length)
             break;
         }
         pBodyPack = pBodyPack->GetNextBlock();
+    }
+    if(pResBlock != NULL)
+    {
+        pResBlock->SetFree(false);
     }
     pthread_mutex_unlock(&m_MutexChain);
     return pResBlock;
