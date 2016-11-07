@@ -118,6 +118,7 @@ void CMemBodyMgr::Push(CBodyPack* pBodyPack)
     if(pBodyPack == NULL)
         return;
 
+
     pBodyPack->SetFree(true);
     
     CBodyPack* pCurBlock = pBodyPack;
@@ -225,6 +226,35 @@ void CMemMgr::Init(CConfig* pConfig)
     m_pMemBodyMgr->Init(iBodySize);
 }
 
+void CMemBodyMgr::Display()
+{
+    CBodyPack *pBodyPack = m_pBodyChain;
+    std::cout << "display\t";
+    while(pBodyPack != NULL)
+    {
+        pBodyPack->Display();
+        std::cout << " --> ";
+        pBodyPack = pBodyPack->GetNextBlock();
+    }
+    std::cout << std::endl;
+}
+
+void CMemBodyMgr::ReverseDisplay()
+{
+    CBodyPack *pBodyPack = m_pBodyChain;
+    while(pBodyPack->GetNextBlock() != NULL)
+    {
+        pBodyPack = pBodyPack->GetNextBlock();
+    }
+    std::cout << "reverse display\t";
+    while(pBodyPack!=NULL)
+    {
+        pBodyPack->Display();
+        std::cout << " --> ";
+        pBodyPack = pBodyPack->GetPreBlock();
+    }
+    std::cout << std::endl;
+}
 
 }
 

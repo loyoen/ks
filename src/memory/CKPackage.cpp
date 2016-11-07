@@ -22,6 +22,11 @@ CMemBlock::~CMemBlock()
 {
 }
 
+void CMemBlock::Display()
+{
+    std::cout << "Length:" << m_iLength << "  Status:" << m_bIsFree;
+}
+
 CHeadPack::CHeadPack(size_t length)
  : CMemBlock(length)
 {
@@ -63,9 +68,8 @@ void CBodyPack::Init(void* pData, CBodyPack* preBlock, CBodyPack* nextBlock)
 
 void CBodyPack::Release()
 {
-    //todo
-    m_bIsFree = true;
-    m_iUsedSize = 0;
+    
+    /* because not lock, not modify anything */ 
     CMemMgr* pMemMgr = CMemMgr::GetMemMgr();
     pMemMgr->GetMemBodyMgr()->Push(this);
 }

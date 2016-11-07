@@ -45,6 +45,10 @@ public:
     void Init(size_t length);
     void Push(CBodyPack* pBodyPack);
     CBodyPack* Pull(size_t length);
+    
+    //test
+    void Display();
+    void ReverseDisplay();
 
 private:
     void*                   m_pStartMemPos;

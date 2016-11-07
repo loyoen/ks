@@ -32,6 +32,7 @@ public:
     size_t          GetUsedSize(){return m_iUsedSize;}
     void*           GetData(){return m_pData;}
     bool            IsFree(){return m_bIsFree;}
+    void            Display();
 
 protected:
     size_t          m_iLength;
