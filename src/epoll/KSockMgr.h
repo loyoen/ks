@@ -1,7 +1,7 @@
  
 /**
  * @file KSockMgr.h
- * @author luoyongen(com@baidu.com)
+ * @author loyoen(com@gmail.com)
  * @date 2016/10/13 10:03:38
  * @brief 
  *  

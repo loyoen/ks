@@ -1,6 +1,6 @@
 /**
  * @file KSockMgr.cpp
- * @author luoyongen(com@baidu.com)
+ * @author loyoen(com@gmail.com)
  * @date 2016/10/13 11:13:00
  * @brief 
  *  
