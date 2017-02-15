@@ -2,7 +2,7 @@
  
 /**
  * @file client.py
- * @author luoyongen(com@baidu.com)
+ * @author loyoen(com@gmail.com)
  * @date 2016/07/31 12:17:51
  * @brief 
  *  
